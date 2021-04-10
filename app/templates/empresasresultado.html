@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %}
+	{{ headtitle }}
+{% endblock %}
+
+{% block main %}
+	<br><br>
+	<h1>Resultado da Busca</h1>
+	{% for empresa in empresas %}
+		{{ empresa[0] }}<br>
+	{% endfor %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+	{{ headtitle }}
+{% endblock %}
+
+{% block main %}
+	<br><br>
+	<h1>Cadastro Empresa</h1>
+	<form action="/empresas/cadastro" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="nome" placeholder="Digite o nome da empresa" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}
