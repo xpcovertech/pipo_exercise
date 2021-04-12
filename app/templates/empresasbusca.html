@@ -1,12 +1,10 @@
 {% extends "layout.html" %}
 
-{% block title %}
-	{{ headtitle }}
-{% endblock %}
-
 {% block main %}
-	<br><br>
+	<p align="right" class="text-muted"><a href="/empresas/cadastro">Cadastrar</a>, <a href="/empresas/busca">buscar</a> ou ver uma <a href="/empresas/lista">lista</a>?</p>
+	<br>
 	<h1>Busca por Empresa</h1>
+	<p class="text-muted">Digite o nome completo da empresa ou parte dele (ex. Escola).</p>
 	<form action="/empresas/busca" method="post">
         <div class="form-group">
             <input autocomplete="off" autofocus class="form-control" name="nome" placeholder="Digite o nome da empresa" type="text">

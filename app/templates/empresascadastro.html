@@ -1,15 +1,13 @@
 {% extends "layout.html" %}
 
-{% block title %}
-	{{ headtitle }}
-{% endblock %}
-
 {% block main %}
-	<br><br>
+	<p align="right" class="text-muted"><a href="/empresas/cadastro">Cadastrar</a>, <a href="/empresas/busca">buscar</a> ou ver uma <a href="/empresas/lista">lista</a>?</p>
+	<br>
 	<h1>Cadastro Empresa</h1>
+	<p class="text-muted">ATENÇÃO: Antes de prosseguir, confira através da <a href="/empresas/busca">busca</a> se a empresa já não foi cadastrada.</p>
 	<form action="/empresas/cadastro" method="post">
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="nome" placeholder="Digite o nome da empresa" type="text">
+            <input autocomplete="off" autofocus class="form-control" name="nome" placeholder="Digite o nome da empresa para cadastro" type="text">
         </div>
         <button class="btn btn-primary" type="submit">Enviar</button>
     </form>

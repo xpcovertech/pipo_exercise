@@ -18,21 +18,21 @@
 
     <body>
         <nav class="navbar navbar-expand-md navbar-light bg-light border">
-            <a class="navbar-brand" href="/">PIPO: {% block title %}{% endblock %}</span></a>
+            <a class="navbar-brand" href="/">o/ {{ header["empresa"] }} {{ header["admin"] }}</span></a>
             <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbar">
                     <ul class="navbar-nav mr-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="/empresas">Empresas</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/colaboradores">Colaboradores</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/pessoas">Pessoas</a></li>
                     </ul>
             </div>
         </nav>
         <main class="container p-5">
             {% block main %}{% endblock %}
         </main>
-        <br><br>
+        <br><br><br>
         <footer class="small text-center text-muted">
            Made with love by <a href="https://github.com/leorapini" target="_blank">Leo</a> for <a href="https://piposaude.com.br" target="_blank">Pipo</a>.
         </footer>

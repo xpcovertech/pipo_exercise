@@ -1,13 +1,14 @@
 {% extends "layout.html" %}
 
-{% block title %}
-	{{ headtitle }}
-{% endblock %}
-
 {% block main %}
-	<br><br>
+	<p align="right" class="text-muted"><a href="/empresas/cadastro">Cadastrar</a>, <a href="/empresas/busca">buscar</a> ou ver uma <a href="/empresas/lista">lista</a>?</p>
+	<br>
 	<h1>Resultado da Busca</h1>
-	{% for empresa in empresas %}
-		{{ empresa[0] }}<br>
-	{% endfor %}
+	{% if lista_empresas|length %}
+		{% for empresa in lista_empresas %}
+			{{ empresa["nome"] }}<br>
+		{% endfor %}
+	{% else %}
+		<p>Nenhum resultado encontrado :(</p>
+	{% endif %}
 {% endblock %}

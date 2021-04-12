@@ -1,10 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}
-	{{ headtitle }}
-{% endblock %}
-
 {% block main %}
-	<br><br>
-	<h1>Olá {{ colaborador }}!</h1>
+	<br>
+	<h1>Olá {{ header["nome"] }}!</h1>
 {% endblock %}

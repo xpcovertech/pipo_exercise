@@ -32,10 +32,11 @@ db = scoped_session(sessionmaker(bind=engine))
 def remove_session(ex=None):
     db.remove()
 
+
+# UTILITIES 
 def login_required(f):
     """
     Decorate routes to require login.
-
     http://flask.pocoo.org/docs/1.0/patterns/viewdecorators/
     """
     @wraps(f)
@@ -45,7 +46,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def get_headtitle(nivel):
+def get_admin_title(nivel):
 	if nivel == 2:
 		headtitle = "Godmode"
 	elif nivel == 1:
@@ -54,30 +55,92 @@ def get_headtitle(nivel):
 		headtitle = "Colaborador"
 	return headtitle
 
+def get_header(session):
+	try: 
+		header = {"nome": session["nome"],
+					"empresa": session["empresa"],
+					"admin": get_admin_title(session["admin"])}
+	except:
+		header = {"nome": "",
+					"empresa": "",
+					"admin": ""}
+	return header
+
+
+# SQL QUERIES
+def get_all(table):
+	if table.isalpha() is not True:
+		return None
+	table_all = db.execute("""SELECT * FROM {}""".format(table)).fetchall()
+	return table_all	
+
+def search_like(table, like):
+	if table.isalpha() is not True:
+		return None
+	table_search_like = db.execute("""SELECT * FROM {} WHERE nome 
+								LIKE :nome""".format(table),
+								{"nome": '%'+like+'%'}).fetchall()
+	return table_search_like
+
+def search_cpf(table, cpf):
+	if table.isalpha() is not True:
+		return None
+	table_search_cpf = db.execute("""SELECT * FROM {} WHERE cpf = :cpf""".format(table),
+								{"cpf": cpf}).fetchall()
+	return table_search_cpf
+
+def cadastro_empresa(nome):
+	try:
+		lista_empresas = get_all("empresa")
+		for empresa in lista_empresas:
+			if empresa["nome"].lower() == nome.lower():
+				return False
+		db.execute("""INSERT INTO empresa (nome) VALUES (:nome)""", {"nome": nome})
+		db.commit()
+		return True
+	except:
+		return False
+
+def get_colaboradores(id_empresa):
+	colaboradores = db.execute("""SELECT * FROM colaborador WHERE id_empresa = :id_empresa ORDER BY nome""",
+					{"id_empresa": id_empresa}).fetchall()
+	return colaboradores
+
+def cadastro_colaborador(nome, cpf, id_empresa):
+	try:
+		lista_colaboradores = db.execute("""SELECT nome FROM colaborador WHERE cpf = :cpf""",
+					{"cpf": cpf}).fetchone()
+		if lista_colaboradores is not None:
+			return False
+		db.execute("""INSERT INTO colaborador (nome, id_empresa, cpf, ativo) 
+						VALUES (:nome, :id_empresa, :cpf, :ativo)""", 
+						{"nome": nome, "id_empresa": id_empresa, "cpf": cpf, "ativo": "s"})
+		db.commit()
+		return True
+	except:
+		return False
+
+
+
+
+# INDEX
 @app.route("/", methods=['GET'])
 @login_required
 def index():
+	return render_template("index.html", header = get_header(session))
 
-	colaborador = db.execute("""SELECT nome FROM colaborador WHERE id = :id""",
-								{"id": session["id_usuario"]}).fetchone()
-	
 
-	return render_template("index.html", colaborador = colaborador[0], 
-							headtitle = get_headtitle(session["admin"]))
-
+# EMPRESAS
 @app.route("/empresas", methods=['GET'])
 @login_required
 def empresas():
-	return render_template("empresas.html", 
-							headtitle = get_headtitle(session["admin"]))
+	return render_template("empresas.html", header = get_header(session))
 
 @app.route("/empresas/lista", methods=['GET'])
 @login_required
 def empresaslista():
-	empresas = db.execute("""SELECT nome FROM empresa""").fetchall()
-
-	return render_template("empresaslista.html", empresas = empresas, 
-							headtitle = get_headtitle(session["admin"]))
+	return render_template("empresaslista.html", header = get_header(session),
+							lista_empresas = get_all("empresa"))
 
 @app.route("/empresas/busca", methods=["GET", "POST"])
 @login_required
@@ -85,17 +148,10 @@ def empresasbusca():
 	if request.method == "POST":
 		if not request.form.get("nome"):
 			return "Por favor insira o nome da empresa"
-		nome = request.form.get("nome")
-		empresas = db.execute("""SELECT nome FROM empresa WHERE nome LIKE :nome""",
-								{"nome": '%'+nome+'%'}).fetchall()
-		if empresas is None:
-			return render_template("empresasresultado.html", empresa = "Empresa não encontrada :(",
-								headtitle = get_headtitle(session["admin"]))
-		return render_template("empresasresultado.html", empresas = empresas,
-								headtitle = get_headtitle(session["admin"]))
+		return render_template("empresasresultado.html", header = get_header(session),
+							lista_empresas = search_like("empresa", request.form.get("nome")))
 	else:
-		return render_template("empresasbusca.html", 
-								headtitle = get_headtitle(session["admin"]))
+		return render_template("empresasbusca.html", header = get_header(session))
 
 @app.route("/empresas/cadastro", methods=["GET", "POST"])
 @login_required
@@ -105,28 +161,63 @@ def empresascadastro():
 			return "Você não está autorizado a incluir novas empresas"
 		if not request.form.get("nome"):
 			return "Por favor insira o nome da empresa"
-		nome = request.form.get("nome")
-		empresas = db.execute("""SELECT nome FROM empresa""").fetchall()
-		for empresa in empresas:
-			if empresa[0].lower() == nome.lower():
-				return "Essa empresa já existe em nosso banco de dados"
-		db.execute("""INSERT INTO empresa (nome) VALUES (:nome)""", {"nome": nome})
-		db.commit()
-		return redirect("/empresas")
+		if cadastro_empresa(request.form.get("nome")):
+			return redirect("/empresas/lista")
+		else:
+			return "Erro no cadastro. Talvez essa empresa já esteja cadastrada."
+	else:
+		return render_template("empresascadastro.html", header = get_header(session))
+
+
+# PESSOAS
+@app.route("/pessoas", methods=['GET'])
+@login_required
+def pessoas():
+	return render_template("colaboradores.html", header = get_header(session))
+
+@app.route("/pessoas/lista", methods=['GET'])
+@login_required
+def pessoaslista():
+	return render_template("colaboradoreslista.html", header = get_header(session),
+							lista_colaboradores = get_colaboradores(session["id_empresa"]))
+
+@app.route("/pessoas/busca", methods=["GET", "POST"])
+@login_required
+def pessoasbusca():
+	if request.method == "POST":
+		if not request.form.get("nome") and not request.form.get("cpf"):
+			return "Por favor insira o nome ou cpf da pessoa"
+		if request.form.get("nome"):
+			return render_template("colaboradoresresultado.html", header = get_header(session),
+							lista_colaboradores = search_like("colaborador", request.form.get("nome")))
+		else:
+			return render_template("colaboradoresresultado.html", header = get_header(session),
+							lista_colaboradores = search_cpf("colaborador", request.form.get("cpf")))
 
 	else:
-		return render_template("empresascadastro.html", 
-								headtitle = get_headtitle(session["admin"]))
+		return render_template("colaboradoresbusca.html", header = get_header(session))
 
-@app.route("/colaboradores", methods=['GET'])
+@app.route("/pessoas/cadastro", methods=["GET", "POST"])
 @login_required
-def colaboradores():
+def pessoascadastro():
+	if request.method == "POST":
+		if session["admin"] == 0:
+			return "Você não está autorizado a incluir novas pessoas"
+		if not request.form.get("nome") or not request.form.get("cpf"):
+			return "Por favor complete o formulário com todos os dados"
+		if request.form.get("cpf").isdigit() is not True:
+			return "O cpf deve conter somente números"
+		if cadastro_colaborador(request.form.get("nome"), request.form.get("cpf"),
+						session["id_empresa"]):
+			return redirect("/colaboradores/lista")
+		else:
+			return "Erro no cadastro. Talvez essa pessoa já esteja cadastrada."
+	else:
+		return render_template("colaboradorescadastro.html", header = get_header(session))
 
-	colaboradores = db.execute("""SELECT nome FROM colaborador""").fetchall()
 
-	return render_template("colaboradores.html", colaboradores = colaboradores, 
-							headtitle = get_headtitle(session["admin"]))
 
+# LOGIN
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -139,27 +230,35 @@ def login():
 
 		cpf = request.form.get("cpf")
 
-		usuario = db.execute("""SELECT id FROM colaborador WHERE cpf = :cpf""",
+		usuario = db.execute("""SELECT id, nome, id_empresa FROM colaborador WHERE cpf = :cpf""",
 							{"cpf": cpf}).fetchone()
-
 		if usuario is None:
 			return "Número de CPF não encontrado"
 
+		empresa = db.execute("""SELECT nome FROM empresa WHERE id = :id""", 
+							{"id": usuario["id_empresa"]}).fetchone()
+		if empresa is None:
+			return "Erro no cadastro do usuário: Empresa Inexistente"
+
 		admin = db.execute("""SELECT nivel FROM admin WHERE id_colaborador = :id_usuario""",
 							{"id_usuario": usuario[0]}).fetchone()
-
-		session["id_usuario"] = usuario[0]
-
 		if admin is None:	
 			session["admin"] = 0
 		else: 
 			session["admin"] = admin[0]
 
+		session["id_usuario"] = usuario["id"]
+		session["id_empresa"] = usuario["id_empresa"]
+		session["nome"] = usuario["nome"]
+		session["empresa"] = empresa[0]
+
 		return redirect("/")
 
 	else:
 
-		return render_template("login.html")
+		#header = {"empresa": "Login", "admin": ""}
+
+		return render_template("login.html", header = get_header(session))
 
 @app.route("/logout")
 def logout():

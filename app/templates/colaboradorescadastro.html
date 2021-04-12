@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <p align="right" class="text-muted"><a href="/pessoass/cadastro">Cadastrar</a>, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
+	<br>
+	<h1>Cadastro Pessoa</h1>
+	<p class="text-muted">ATENÇÃO: Antes de prosseguir, confira através da <a href="/colaboradores/busca">busca</a> se a pessoa já não foi cadastrada.</p>
+	<form action="/pessoas/cadastro" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="nome" placeholder="Digite o nome da pessoa para cadastro" type="text"><br>
+            <input autocomplete="off" autofocus class="form-control" name="cpf" placeholder="Digite o número de cpf da pessoa sem pontos ou traços" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}

@@ -1,14 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}
-	{{ headtitle }}
-{% endblock %}
-
 {% block main %}
-	<p align="right"><a href="/colaboradores/cadastro">Cadastrar Novo Colaborador</a></p>
-	<br>
-	<h2>Colaboradores:</h2>
-	{% for colaborador in colaboradores %}
-		{{ colaborador[0] }}<br>
-	{% endfor %}
+	<br><br>
+	<h1>Você deseja <a href="/pessoas/cadastro">cadastrar</a> uma nova pessoa, <a href="/pessoas/busca">buscar</a> por uma ou ver uma <a href="/pessoas/lista">lista</a> completa?</h1>
 {% endblock %}

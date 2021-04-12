@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/pessoass/cadastro">Cadastrar</a>, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
+	<br>
+	<h1>Busca por Pessoa</h1>
+	<p class="text-muted">Digite o nome completo da pessoa ou parte dele (ex. Felipa).</p>
+	<form action="/pessoas/busca" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="nome" placeholder="Digite o nome da pessoa" type="text"><br>
+            <input autocomplete="off" autofocus class="form-control" name="cpf" placeholder="Ou digite o CPF" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}
