@@ -4,7 +4,7 @@
 	<p align="right" class="text-muted"><a href="/empresas/cadastro">Cadastrar</a>, <a href="/empresas/busca">buscar</a> ou ver uma <a href="/empresas/lista">lista</a>?</p>
 	<br>
 	<h1>Clientes da Pipo ❤️</h1>
-	{% if lista_empresas is not none %}
+	{% if lista_empresas|length %}
 		{% for empresa in lista_empresas %}
 			{{ empresa["nome"] }}<br>
 		{% endfor %}

@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/beneficios/cadastro">Cadastrar</a>, <a href="/beneficios/busca">buscar</a> ou ver uma <a href="/beneficios/lista">lista</a>?</p>
+	<br>
+	<h1>Resultado da Busca</h1>
+	{% if lista_beneficios|length %}
+		{% for beneficio in lista_beneficios %}
+			{{ beneficio["nome"] }}<br>
+		{% endfor %}
+	{% else %}
+		<p>Nenhum resultado encontrado :(</p>
+	{% endif %}
+{% endblock %}

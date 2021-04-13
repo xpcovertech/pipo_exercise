@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 
 {% block main %}
-	<p align="right" class="text-muted"><a href="/pessoass/cadastro">Cadastrar</a>, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
+	<p align="right" class="text-muted"><a href="/pessoas/cadastro">Cadastrar</a>, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
 	<br>
-	<h2>Pessoas da {{ header["empresa"] }}</h2>
-	{% if lista_colaboradores is not none %}
+	<h1>Pessoas da {{ header["empresa"] }}</h1>
+	{% if lista_colaboradores|length %}
 		{% for colaborador in lista_colaboradores %}
-			{{ colaborador["nome"] }}<br>
+			<a href="/pessoas/perfil/{{ colaborador['id'] }}"}}>{{ colaborador["nome"] }}</a><br>
 		{% endfor %}
 	{% else %}
 		<p>Nenhum resultado encontrado :(</p>

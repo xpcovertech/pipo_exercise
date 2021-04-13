@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/pessoas/cadastro">Cadastrar</a>, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
+	<br>
+	<h2>{{ perfil["nome"] }}</h2>
+	<p>ID: {{perfil["id"]}}<br>
+	CPF: {{ perfil["cpf"] }}<br>
+	Nível de Acesso: {{ perfil["admin"] }}</p>
+	<a href="/pessoas/editar/{{ perfil['id'] }}" class="btn btn-primary btn-sm">Editar Dados</a>
+	<br>
+{% endblock %}

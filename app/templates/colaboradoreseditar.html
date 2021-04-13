@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/pessoas/cadastro">Cadastrar</a>, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
+	<br>
+	<h1>Editar Perfil</h1>
+	<form action="/pessoas/editar" method="post">
+        <div class="form-group row">
+        	<label for="id" class="col-sm-2 col-form-label">ID:</label>
+        	<div class="col-sm-10">
+            	<input autocomplete="off" readonly class="form-control-plaintext" name="id" value="{{ perfil['id'] }}" type="text">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="nome" class="col-sm-2 col-form-label">Nome:</label>
+        	<div class="col-sm-10">
+            	<input autocomplete="off" autofocus class="form-control" name="nome" placeholder="{{ perfil['nome'] }}" type="text">
+            </div>
+        </div>
+        <div class="form-group row">
+        	<label for="cpf" class="col-sm-2 col-form-label">CPF:</label>
+        	<div class="col-sm-10">
+            	<input autocomplete="off" readonly class="form-control-plaintext" name="cpf" value="{{ perfil['cpf'] }}" type="text">
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}

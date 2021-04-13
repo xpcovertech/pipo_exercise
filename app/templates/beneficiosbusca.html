@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/beneficios/cadastro">Cadastrar</a>, <a href="/beneficios/busca">buscar</a> ou ver uma <a href="/beneficios/lista">lista</a>?</p>
+	<br>
+	<h1>Busca por Benefício</h1>
+	<p class="text-muted">Digite o nome completo do benefício ou parte dele (ex. Saúde).</p>
+	<form action="/beneficios/busca" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="nome" placeholder="Digite o nome do benefício" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}

@@ -35,10 +35,6 @@ def remove_session(ex=None):
 
 # UTILITIES 
 def login_required(f):
-    """
-    Decorate routes to require login.
-    http://flask.pocoo.org/docs/1.0/patterns/viewdecorators/
-    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("id_usuario") is None:
@@ -48,7 +44,7 @@ def login_required(f):
 
 def get_admin_title(nivel):
 	if nivel == 2:
-		headtitle = "Godmode"
+		headtitle = "System Admin"
 	elif nivel == 1:
 		headtitle = "Admin"
 	else:
@@ -59,11 +55,13 @@ def get_header(session):
 	try: 
 		header = {"nome": session["nome"],
 					"empresa": session["empresa"],
-					"admin": get_admin_title(session["admin"])}
+					"admin": get_admin_title(session["admin"]),
+					"id_usuario": session["id_usuario"]}
 	except:
 		header = {"nome": "",
 					"empresa": "",
-					"admin": ""}
+					"admin": "",
+					"id_usuario": ""}
 	return header
 
 
@@ -101,15 +99,27 @@ def cadastro_empresa(nome):
 	except:
 		return False
 
+def cadastro_beneficio(nome):
+	try:
+		lista_beneficios = get_all("beneficio")
+		for beneficio in lista_beneficios:
+			if beneficio["nome"].lower() == nome.lower():
+				return False
+		db.execute("""INSERT INTO beneficio (nome) VALUES (:nome)""", {"nome": nome})
+		db.commit()
+		return True
+	except:
+		return False
+
 def get_colaboradores(id_empresa):
-	colaboradores = db.execute("""SELECT * FROM colaborador WHERE id_empresa = :id_empresa ORDER BY nome""",
-					{"id_empresa": id_empresa}).fetchall()
+	colaboradores = db.execute("""SELECT * FROM colaborador WHERE id_empresa = :id_empresa 
+								ORDER BY nome""", {"id_empresa": id_empresa}).fetchall()
 	return colaboradores
 
 def cadastro_colaborador(nome, cpf, id_empresa):
 	try:
 		lista_colaboradores = db.execute("""SELECT nome FROM colaborador WHERE cpf = :cpf""",
-					{"cpf": cpf}).fetchone()
+										{"cpf": cpf}).fetchone()
 		if lista_colaboradores is not None:
 			return False
 		db.execute("""INSERT INTO colaborador (nome, id_empresa, cpf, ativo) 
@@ -120,7 +130,26 @@ def cadastro_colaborador(nome, cpf, id_empresa):
 	except:
 		return False
 
+def get_perfil(id_usuario):
+	colaborador = db.execute("""SELECT * FROM colaborador WHERE id = :id""",
+							{"id": id_usuario}).fetchone()
+	admin = db.execute("""SELECT nivel FROM admin WHERE id_colaborador = :id_colaborador""",
+						{"id_colaborador": id_usuario}).fetchone()
+	if admin is not None:
+		user_admin = admin["nivel"]
+	else:
+		user_admin = 0
+	perfil = {"nome": colaborador["nome"],
+				"id": colaborador["id"],
+				"cpf": colaborador["cpf"],
+				"admin": get_admin_title(user_admin)}
+	return perfil
 
+def get_beneficios(id_empresa):
+	beneficios = db.execute("""SELECT id, nome FROM beneficio JOIN beneficio_empresa ON id = id_beneficio 
+							IN (SELECT id_beneficio FROM beneficio_empresa WHERE id_empresa = :id_empresa)
+							ORDER BY nome""", {"id_empresa": id_empresa}).fetchall()
+	return beneficios
 
 
 # INDEX
@@ -209,13 +238,70 @@ def pessoascadastro():
 			return "O cpf deve conter somente números"
 		if cadastro_colaborador(request.form.get("nome"), request.form.get("cpf"),
 						session["id_empresa"]):
-			return redirect("/colaboradores/lista")
+			return redirect("/pessoas/lista")
 		else:
 			return "Erro no cadastro. Talvez essa pessoa já esteja cadastrada."
 	else:
-		return render_template("colaboradorescadastro.html", header = get_header(session))
+		return render_template("colaboradorescadastro.html", header = get_header(session),
+								lista_beneficios = get_beneficios(session["id_empresa"]))
+
+@app.route("/pessoas/perfil/<id_pessoa>", methods=["GET"])
+@login_required
+def pessoasperfil(id_pessoa):
+	return render_template("colaboradoresperfil.html", header = get_header(session),
+								perfil = get_perfil(id_pessoa))
+
+@app.route("/pessoas/editar/<id_pessoa>", methods=["GET", "POST"])
+@login_required
+def pessoaseditar(id_pessoa):
+	if request.method == "POST":
+		if session["admin"] == 0:
+			return "Você não está autorizado a editar perfis"
+		return redirect("/pessoas/perfil/{}").format(id_pessoa)
+	else:
+		if session["admin"] == 0:
+			return "Você não está autorizado a editar perfis"
+		return render_template("colaboradoreseditar.html", header = get_header(session),
+								perfil = get_perfil(id_pessoa))
 
 
+#beneficios
+@app.route("/beneficios", methods=['GET'])
+@login_required
+def beneficios():
+	return render_template("beneficios.html", header = get_header(session))
+
+@app.route("/beneficios/lista", methods=['GET'])
+@login_required
+def beneficioslista():
+	return render_template("beneficioslista.html", header = get_header(session),
+							lista_beneficios = get_all("beneficio"))
+
+@app.route("/beneficios/busca", methods=["GET", "POST"])
+@login_required
+def beneficiosbusca():
+	if request.method == "POST":
+		if not request.form.get("nome"):
+			return "Por favor insira o nome do beneficio"
+		return render_template("beneficiosresultado.html", header = get_header(session),
+							lista_beneficios = search_like("beneficio", request.form.get("nome")))
+	else:
+		return render_template("beneficiosbusca.html", header = get_header(session))
+
+@app.route("/beneficios/cadastro", methods=["GET", "POST"])
+@login_required
+def beneficioscadastro():
+	if request.method == "POST":
+		if session["admin"] == 0:
+			return "Você não está autorizado a incluir novos beneficios"
+		if not request.form.get("nome"):
+			return "Por favor insira o nome do beneficio"
+		if cadastro_beneficio(request.form.get("nome")):
+			return redirect("/beneficios/lista")
+		else:
+			return "Erro no cadastro. Talvez esse beneficio já esteja cadastrado."
+	else:
+		return render_template("beneficioscadastro.html", header = get_header(session))
 
 # LOGIN
 @app.route("/login", methods=["GET", "POST"])
@@ -260,11 +346,12 @@ def login():
 
 		return render_template("login.html", header = get_header(session))
 
+
 @app.route("/logout")
 def logout():
     """Log user out"""
 
-    # Forget any user_id
+    # Forget any id
     session.clear()
 
     # Redirect user to login form
