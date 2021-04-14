@@ -3,26 +3,51 @@
 {% block main %}
 	<p align="right" class="text-muted"><a href="/pessoas/cadastro">Cadastrar</a>, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
 	<br>
-	<h1>Editar Perfil</h1>
-	<form action="/pessoas/editar" method="post">
+	<h1>Editar Perfil</h1><br>
+	<form action="/pessoas/editar/{{ perfil['id'] }}" method="post">
         <div class="form-group row">
         	<label for="id" class="col-sm-2 col-form-label">ID:</label>
         	<div class="col-sm-10">
-            	<input autocomplete="off" readonly class="form-control-plaintext" name="id" value="{{ perfil['id'] }}" type="text">
+            	<input readonly class="form-control" name="id" value="{{ perfil['id'] }}" type="text">
             </div>
         </div>
         <div class="form-group row">
             <label for="nome" class="col-sm-2 col-form-label">Nome:</label>
         	<div class="col-sm-10">
-            	<input autocomplete="off" autofocus class="form-control" name="nome" placeholder="{{ perfil['nome'] }}" type="text">
+            	<input readonly class="form-control" name="nome" value="{{ perfil['nome'] }}" type="text">
             </div>
         </div>
         <div class="form-group row">
         	<label for="cpf" class="col-sm-2 col-form-label">CPF:</label>
         	<div class="col-sm-10">
-            	<input autocomplete="off" readonly class="form-control-plaintext" name="cpf" value="{{ perfil['cpf'] }}" type="text">
+            	<input readonly class="form-control" name="cpf" value="{{ perfil['cpf'] }}" type="text">
             </div>
         </div>
+        <br>
+        {% if lista_beneficios|length %}
+            <h4>Selecione os benefícios que gostaria de remover ou adicionar.</h4>
+            <br>
+            <h5>Benefícios Cadastrados</h5>
+            <div class="form-check">
+                {% for beneficio in lista_beneficios %}
+                    {% if beneficio in perfil["beneficios"] %}
+                        <input class="form-check-input" type="checkbox" id="{{ beneficio['id'] }}" name="id_beneficio" value="{{ beneficio['id'] }}" checked>
+                        <label class="form-check-label" for="{{ beneficio['id'] }}">{{ beneficio['nome'] }}</label><br>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <br>
+            <h5>Benefícios Não Cadastrados</h5>
+            <div class="form-check">
+                {% for beneficio in lista_beneficios %}
+                    {% if beneficio not in perfil["beneficios"] %}
+                        <input class="form-check-input" type="checkbox" id="{{ beneficio['id'] }}" name="id_beneficio" value="{{ beneficio['id'] }}">
+                        <label class="form-check-label" for="{{ beneficio['id'] }}">{{ beneficio['nome'] }}</label><br>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <br>
+        {% endif %}
         <button class="btn btn-primary" type="submit">Enviar</button>
     </form>
 {% endblock %}

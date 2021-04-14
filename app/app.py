@@ -137,8 +137,11 @@ def get_perfil_cpf(cpf):
 def get_perfil(id_usuario):
 	colaborador = db.execute("""SELECT * FROM colaborador WHERE id = :id""",
 							{"id": id_usuario}).fetchone()
+	beneficios = get_beneficios_pessoa(colaborador["id"])
+	dados = get_todos_dados_pessoa(colaborador["id"])
 	admin = db.execute("""SELECT nivel FROM admin WHERE id_colaborador = :id_colaborador""",
 						{"id_colaborador": id_usuario}).fetchone()
+	
 	if admin is not None:
 		user_admin = admin["nivel"]
 	else:
@@ -146,13 +149,21 @@ def get_perfil(id_usuario):
 	perfil = {"nome": colaborador["nome"],
 				"id": colaborador["id"],
 				"cpf": colaborador["cpf"],
-				"admin": get_admin_title(user_admin)}
+				"admin": get_admin_title(user_admin),
+				"beneficios": beneficios,
+				"dados": dados}
 	return perfil
 
 def get_beneficios(id_empresa):
 	beneficios = db.execute("""SELECT id, nome FROM beneficio JOIN beneficio_empresa ON id = id_beneficio 
 							IN (SELECT id_beneficio FROM beneficio_empresa WHERE id_empresa = :id_empresa)
 							ORDER BY nome""", {"id_empresa": id_empresa}).fetchall()
+	return beneficios
+
+def get_beneficios_pessoa(id_pessoa):
+	beneficios = db.execute("""SELECT id, nome FROM beneficio WHERE id  
+							IN (SELECT id_beneficio FROM beneficio_colaborador WHERE id_colaborador = :id_colaborador)
+							ORDER BY nome""", {"id_colaborador": id_pessoa}).fetchall()
 	return beneficios
 
 def get_perfil_beneficio(id_beneficio):
@@ -187,6 +198,46 @@ def update_dados_beneficio(id_beneficio, dados_formulario):
 	db.commit()
 	return True
 
+# dados formulário são type(str)
+def update_dados_pessoa(id_pessoa, beneficios_form):
+	flag = 0
+	beneficios_pessoa = db.execute("""SELECT id_beneficio FROM beneficio_colaborador WHERE id_colaborador = :id_colaborador""",
+								{"id_colaborador": id_pessoa}).fetchall()
+	# Checar se a pessoa possuia benefícios e todos foram retirados
+	if len(beneficios_form) == 0 and beneficios_pessoa is not None:
+		for beneficio in beneficios_pessoa:
+			db.execute("""DELETE FROM beneficio_colaborador WHERE id_colaborador = :id_colaborador
+						AND id_beneficio = :id_beneficio""", {"id_beneficio": beneficio["id_beneficio"],
+						"id_colaborador": id_pessoa})
+	else:
+		if beneficios_pessoa is None:
+			beneficios_pessoa = []
+		for beneficio in beneficios_form:
+			if (int(beneficio),) in beneficios_pessoa:
+				pass
+			elif (int(beneficio),) not in beneficios_pessoa:
+				db.execute("""INSERT INTO beneficio_colaborador (id_colaborador, id_beneficio) 
+							VALUES (:id_colaborador, :id_beneficio)""",
+							{"id_colaborador": id_pessoa, "id_beneficio": beneficio})
+				flag = 1
+		for beneficio_db in beneficios_pessoa:
+			if str(beneficio_db[0]) not in beneficios_form:
+				db.execute("""DELETE FROM beneficio_colaborador WHERE id_beneficio = :id_beneficio 
+							AND id_colaborador = :id_colaborador""", {"id_beneficio": beneficio_db[0],
+							"id_colaborador": id_pessoa})
+	db.commit()
+	if flag == 1:
+		return True
+	else:
+		return False
+
+def cadastro_colaborador_beneficios(lista_beneficios, id_colaborador):
+	for beneficio in lista_beneficios:
+		db.execute("""INSERT INTO beneficio_colaborador (id_colaborador, id_beneficio)
+					VALUES (:id_colaborador, :id_beneficio)""",
+					{"id_colaborador": id_colaborador, "id_beneficio": beneficio})
+	db.commit()
+
 def get_dados_beneficios(lista_de_beneficios):
 	lista_dados = []
 	for id_beneficio in lista_de_beneficios:
@@ -200,31 +251,59 @@ def get_dados_beneficios(lista_de_beneficios):
 
 # Otimizar para que a busca seja feita só uma vez
 def get_dado(id_colaborador, id_tipo_de_dado):
-	dado_colab = db.execute("""SELECT * FROM dado_colaborador WHERE id_colaborador = :id_colaborador
+	dado_colab = db.execute("""SELECT dado FROM dado_colaborador WHERE id_colaborador = :id_colaborador
 							AND id_tipo_de_dado = :id_tipo_de_dado""",
 							{"id_colaborador": id_colaborador, "id_tipo_de_dado": id_tipo_de_dado}).fetchone()
-	return dado_colab
+	if dado_colab is None:
+		return None
+	else:
+		return dado_colab[0]
 
-# Não funciona. 
+def get_todos_dados_pessoa(id_pessoa):
+	todos_dados = db.execute("""SELECT nome, id_colaborador, id_tipo_de_dado, dado 
+							FROM dado_colaborador JOIN tipo_de_dado ON id_tipo_de_dado = id
+							WHERE id_colaborador = :id_colaborador""",
+							{"id_colaborador": id_pessoa}).fetchall()
+	return todos_dados
+
 def get_dados(lista_dados, id_usuario):
-	print(lista_dados)
-	dados_dict = [{"id_dado": 0,"nome": 0, "dado": 0}]
+	dados_cadastro = []
 	perfil = get_perfil(id_usuario)
-	for i in range(len(lista_dados) - 1):
-		print(i)
-		dados_dict[i]["id_dado"] = lista_dados[i][0]
-		dados_dict[i]["id_nome"] = lista_dados[i][1]
-		if lista_dados[i][0] == "1":
-			dados_dict[i]["dado"] = perfil["nome"]
-		elif lista_dados[i][0] == "2":
-			dados_dict[i]["dado"] = perfil["cpf"]
+	for dado in lista_dados:
+		if dado[0] == 1:
+			dado_cadastro = perfil["nome"]
+		elif dado[0] == 2:
+			dado_cadastro = perfil["cpf"]
 		else:
-			dado = get_dado(id_usuario, lista_dados[i][0])
-			if dado is not None:
-				dados_dict[i]["dado"] = dado["dado"]
+			dado_cadastro = get_dado(id_usuario, dado[0])
+		dados_cadastro.append({"id": dado[0], "nome": dado[1], "dado": dado_cadastro})
+	return dados_cadastro
+
+# Confirma se dado já está cadastrado antes // dados vindos do formulário são type(str)
+def cadastro_dados_colaborador_beneficio(id_colaborador, ids_tipo_de_dado, valores_dados):
+	tipos_de_dado = db.execute("""SELECT id_tipo_de_dado FROM dado_colaborador 
+								WHERE id_colaborador = :id_colaborador""",
+								{"id_colaborador": id_colaborador}).fetchall()
+	if tipos_de_dado == None:
+		tipos_de_dado = []
+	for i in range(len(ids_tipo_de_dado)):
+		if (int(ids_tipo_de_dado[i]),) in tipos_de_dado:
+			if valores_dados[i] == get_dado(id_colaborador, ids_tipo_de_dado[i]):
+				pass
 			else:
-				dados_dict[i]["dado"] = 0
-	return dados_dict
+				db.execute("""UPDATE dado_colaborador SET dado = :dado WHERE 
+					id_tipo_de_dado = :id_tipo_de_dado, id_colaborador = :id_colaborador""",
+					{"dado": valores_dados[i], "id_tipo_de_dado": ids_tipo_de_dado[i],
+					"id_colaborador": id_colaborador})
+		else:
+			db.execute("""INSERT INTO dado_colaborador (id_colaborador, id_tipo_de_dado, dado)
+				VALUES (:id_colaborador, :id_tipo_de_dado, :dado)""",
+				{"id_colaborador": id_colaborador, "id_tipo_de_dado": ids_tipo_de_dado[i],
+				"dado": valores_dados[i]})
+	db.commit()
+
+
+
 
 # INDEX
 @app.route("/", methods=['GET'])
@@ -272,6 +351,8 @@ def empresascadastro():
 		return render_template("empresascadastro.html", header = get_header(session))
 
 
+
+
 # PESSOAS
 @app.route("/pessoas", methods=['GET'])
 @login_required
@@ -314,22 +395,39 @@ def pessoascadastro():
 		if cpf.isdigit() is not True:
 			return "O cpf deve conter somente números"
 		if cadastro_colaborador(nome, cpf, session["id_empresa"]):
+			perfil = get_perfil_cpf(cpf)
 			if lista_beneficios:
-				perfil = get_perfil_cpf(cpf)
+				cadastro_colaborador_beneficios(lista_beneficios, perfil["id"])
 				lista_dados = get_dados_beneficios(lista_beneficios)
 				dados = get_dados(lista_dados, perfil["id"])
-				return render_template("colabcadastrobeneficio.html", header = get_header(session),
+				return render_template("colabcadastrobeneficio.html", 
+								header = get_header(session),
 								perfil = perfil, lista_dados = dados)
-			return redirect("/pessoas/lista")
+			return redirect("/pessoas/perfil/{}".format(perfil["id"]))
 		else:
 			return "Erro no cadastro. Talvez essa pessoa já esteja cadastrada."
 	else:
 		return render_template("colaboradorescadastro.html", header = get_header(session),
 								lista_beneficios = get_beneficios(session["id_empresa"]))
 
+@app.route("/pessoas/cadastro/beneficio", methods=["GET", "POST"])
+@login_required
+def pessoascadastrobeneficio():
+	if request.method == "POST":
+		id_colaborador = request.form.get("id_colaborador")
+		ids_tipo_de_dado = request.form.getlist("id_tipo_de_dado")
+		valores_dados = request.form.getlist("valor_dado")
+		if ids_tipo_de_dado and valores_dados:
+			cadastro_dados_colaborador_beneficio(id_colaborador, ids_tipo_de_dado, valores_dados)
+		return redirect("/pessoas/perfil/{}".format(id_colaborador))
+	else:
+		return redirect("/pessoas/lista")
+
+
 @app.route("/pessoas/perfil/<id_pessoa>", methods=["GET"])
 @login_required
 def pessoasperfil(id_pessoa):
+	beneficios_pessoa = get_beneficios_pessoa(id_pessoa)
 	return render_template("colaboradoresperfil.html", header = get_header(session),
 								perfil = get_perfil(id_pessoa))
 
@@ -339,12 +437,20 @@ def pessoaseditar(id_pessoa):
 	if request.method == "POST":
 		if session["admin"] == 0:
 			return "Você não está autorizado a editar perfis"
-		return redirect("/pessoas/perfil/{}").format(id_pessoa)
+		if update_dados_pessoa(request.form.get("id"), request.form.getlist("id_beneficio")):
+			perfil = get_perfil(request.form.get("id"))
+			lista_dados = get_dados_beneficios(request.form.getlist("id_beneficio"))
+			dados = get_dados(lista_dados, perfil["id"])
+			return render_template("colabcadastrobeneficio.html", 
+								header = get_header(session),
+								perfil = perfil, lista_dados = dados)
+		return redirect("/pessoas/perfil/{}".format(id_pessoa))
 	else:
 		if session["admin"] == 0:
 			return "Você não está autorizado a editar perfis"
 		return render_template("colaboradoreseditar.html", header = get_header(session),
-								perfil = get_perfil(id_pessoa))
+								perfil = get_perfil(id_pessoa), 
+								lista_beneficios = get_beneficios(session["id_empresa"]))
 
 
 
@@ -410,6 +516,7 @@ def beneficioseditar(id_beneficio):
 		return render_template("beneficioseditar.html", header = get_header(session),
 								perfil = get_perfil_beneficio(id_beneficio), 
 								lista_dados = get_all("tipo_de_dado"))
+
 
 
 # LOGIN
