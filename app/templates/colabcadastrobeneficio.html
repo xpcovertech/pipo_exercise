@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <p align="right" class="text-muted"><a href="/pessoas/cadastro">Cadastrar</a>, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
+    <br>
+	<h1>Dados para Cadastro {{ perfil["nome"] }} nos Benefícios</h1>
+	<form action="/beneficios/editar/{{ perfil['id'] }}" method="post">
+        {% if lista_dados|length %}
+            {% for dado in lista_dados %}
+                <div class="form-group row">
+                    <label for="{{ dado[0] }}" class="col-sm-2 col-form-label">{{ dado[1] }}</label><br>
+                    <div class="col-sm-10">
+                        <input autocomplete="off" autofocus class="form-control" id="{{ dado[0] }}" name="id_tipo_de_dado" placeholder="{{ dado[1] }}" type="text">
+                    </div>
+                </div><br>
+            {% endfor %}
+        {% endif %}
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}

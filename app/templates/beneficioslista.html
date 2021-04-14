@@ -6,7 +6,7 @@
 	<h1>Benefícios Oferecidos</h1>
 	{% if lista_beneficios|length %}
 		{% for beneficio in lista_beneficios %}
-			{{ beneficio["nome"] }}<br>
+			<a href="/beneficios/perfil/{{ beneficio['id'] }}">{{ beneficio["nome"] }}</a><br>
 		{% endfor %}
 	{% else %}
 		<p>Nenhum resultado encontrado :(</p>
