@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/{{ who }}/cadastro">Cadastrar</a> {{ who }}, <a href="/{{ who }}/busca">buscar</a> ou ver uma <a href="/{{ who }}/lista">lista</a>?</p>
+	<br>
+	{% if who == "empresas" %}
+		<h1>Clientes da Pipo ❤️</h1>
+	{% elif who == "beneficios" %}
+		<h1>Benefícios Disponíveis</h1>
+	{% else %}
+		<h1>Pessoas da {{ header["company"] }}</h1>
+	{% endif %}
+	{% if who_list|length %}
+		{% for item in who_list %}
+			<a href="/{{ who }}/perfil/{{ item['id'] }}">{{ item["name"] }}</a><br>
+		{% endfor %}
+	{% else %}
+		<p>Nenhum resultado encontrado :(</p>
+	{% endif %}
+	<br><br>
+{% endblock %}

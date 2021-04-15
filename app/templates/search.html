@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/{{ who }}/cadastro">Cadastrar</a> {{ who }}, <a href="/{{ who }}/busca">buscar</a> ou ver uma <a href="/{{ who }}/lista">lista</a>?</p>
+	<br>
+	<h1>Busca por {{ who }}</h1>
+	<p class="text-muted">Digite o nome completo ou parte dele.</p>
+	<form action="/{{ who }}/busca" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="name" placeholder="Digite o nome" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}
