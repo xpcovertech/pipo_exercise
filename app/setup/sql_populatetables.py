@@ -12,11 +12,11 @@ def populate_company(db):
 						(name) 
 						VALUES (:name)""",
 						{"name": name})
-			time.sleep(2) # sleep para que o timestamp seja diferente
+			time.sleep(1) # sleep para que o timestamp seja diferente
 	print("Company populated!")
 
 def populate_person(db):
-	print("Populating person... time.sleep(2)")
+	print("Populating person... time.sleep(1)")
 	with open("data/person.csv", "r") as data:
 		reader = csv.DictReader(data)
 		for row in reader:
@@ -27,7 +27,7 @@ def populate_person(db):
 						(idCompany, name, cpf) 
 						VALUES (:idCompany, :name, :cpf)""",
 						{"idCompany": idCompany, "name": name, "cpf": cpf})
-			time.sleep(2)
+			time.sleep(1)
 	print("Person populated!")
 
 def populate_admin(db):

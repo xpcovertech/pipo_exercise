@@ -192,13 +192,18 @@ def register_benefit(name):
 	except:
 		return False
 
-def register_datatype(name, example):
+def register_datatype(name, example, idBenefit):
 	datatypes = get_all_table("datatype")
 	for datatype in datatypes:
 		if datatype["name"].lower() == name.lower():
 			return False
 	db.execute("""INSERT INTO datatype (name, example) VALUES (:name, :example)""",
 				{"name": name, "example": example})
+	db.commit()
+	new_datatype = get_one_from("datatype", "name", name)
+	db.execute("""INSERT INTO benefitData (idBenefit, idDatatype)
+						VALUES (:idBenefit, :idDatatype)""",
+						{"idBenefit": idBenefit, "idDatatype": new_datatype["id"]})
 	db.commit()
 	return True
 
@@ -438,6 +443,13 @@ def get_benefit_profile(idBenefit):
 				"companies": companies}
 	return profile
 
+def get_admission_date(idPerson, idBenefit):
+	date = db.execute("""SELECT timestamp FROM personBenefit WHERE idPerson = :idPerson
+						AND idBenefit = :idBenefit""", {"idPerson": idPerson, 
+						"idBenefit": idBenefit}).fetchone()
+	formated = date[0][0:10]
+	return formated
+
 
 
 # INDEX
@@ -553,23 +565,24 @@ def regiterpersondata():
 
 
 # REGISTER NEW DATATYPE
-@app.route("/beneficios/cadastro/dado", methods=['GET','POST'])
+@app.route("/beneficios/cadastro/dado/<idWho>", methods=['GET','POST'])
 @login_required
-def registernewdatatype():
+def registernewdatatype(idWho):
 	if request.method == "POST":
 		name = request.form.get("name")
 		example = request.form.get("example")
 		if not name or not example:
 			return "Você precisa preencher os dois campos"
-		if register_datatype(name, example):
-			return redirect("/beneficios/lista")
+		if register_datatype(name, example, idWho):
+			return redirect("/beneficios/perfil/{}".format(idWho))
 		else:
 			return "Houve um erro no cadastro, por favor tente novamente"
 	else:
 		data_list = get_all_table("datatype")
 		return render_template("registernewdatatype.html", 
 											header = get_header(session),
-											data_list = data_list)
+											data_list = data_list,
+											idWho = idWho)
 
 
 # BENEFIT FORM PROFILE
@@ -578,10 +591,13 @@ def registernewdatatype():
 def benefitformprofile(idBenefit, idPerson):
 	benefit_profile = get_benefit_profile(idBenefit)
 	person_profile = get_profile(idPerson)
+	admission_date = get_admission_date(idPerson, idBenefit)
+	print(admission_date)
 	# checar se colaborador está cadastrado no plano antes de prosseguir
 	return render_template("benefitformprofile.html", header = get_header(session),
 												benefit = benefit_profile,
-												person = person_profile)
+												person = person_profile,
+												admission_date = admission_date)
 
 
 # PROFILES
@@ -611,7 +627,9 @@ def editprofile(who, idWho):
 	if request.method == "POST":
 		if who == "pessoas":
 			ids_benefit = request.form.getlist("idBenefit")
-			if update_person_benefits(idWho, ids_benefit):
+			force_update = request.form.get("force_update")
+			updated = update_person_benefits(idWho, ids_benefit)
+			if updated or force_update:
 				profile = get_profile(idWho)
 				benefits_data = get_benefits_data(ids_benefit)
 				person_data_to_fill = get_person_data(profile, benefits_data)
@@ -677,6 +695,8 @@ def login():
 		cpf = request.form.get("cpf")
 		if not cpf:
 			return "Por favor insira seu CPF"
+		if not isCpfValid(cpf):
+			return "Número de CPF não válido"
 		person = get_one_from("person", "cpf", cpf)
 		if person is None:
 			return "Número de CPF não encontrado"

@@ -3,8 +3,8 @@
 {% block main %}
     <p align="right" class="text-muted"><a href="/beneficios/cadastro">Cadastrar</a> beneficios, <a href="/beneficios/busca">buscar</a> ou ver uma <a href="/beneficios/lista">lista</a>?</p>
     <br>
-	<h1>Dados para Cadastro de Benefício</h1>
-    <h4 style="margin-top: 20px;">Dados já Cadastrados</h4>
+	<h1>Dados para Cadastro de Benefícios</h1>
+    <h4 style="margin-top: 20px;">Tipos de Dados já Cadastrados</h4>
     {% if data_list|length %}
         {% for data in data_list|sort(attribute='name') %}
             {{ data['name'] }}<br>
@@ -13,8 +13,9 @@
         <p>Não existem dados cadastrados.</p>
     {% endif %}
     <br>
-    <h4>Novo Dado</h4>
-	<form action="/beneficios/cadastro/dado" method="post">
+    <h4>Novo Tipo Dado</h4>
+    <p>O cadastro de um novo tipo de dado também ficará disponível todos os outros planos.</p>
+	<form action="/beneficios/cadastro/dado/{{ idWho }}" method="post">
         <div class="form-group row">
             <label for="name" class="col-sm-2 col-form-label">Nome:</label><br>
             <div class="col-sm-10">

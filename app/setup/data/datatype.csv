@@ -1,7 +1,7 @@
 name,example
 "Nome","Ex. Ronaldo Farias Azevedo"
 "CPF","Digite o número do CPF no padrão. Ex. 000.000.000-00"
-"Data Admissão","Digite a data no formato DD/MM/AAAA"
+"Data Admissão","Este dado é gerado automaticamente"
 "Endereço","Ex. Av. Rebouças, 1020, ap 23, São Paulo - SP"
 "Peso (kg)","Digite somente os números. Ex. 75"
 "Altura (cm)","Digite somente os números em centímetros. Ex. 175"
