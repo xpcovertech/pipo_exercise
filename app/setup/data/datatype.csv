@@ -1,6 +1,6 @@
 name,example
 "Nome","Ex. Ronaldo Farias Azevedo"
-"CPF","Somente os números do CPF. Ex. 0075777754"
+"CPF","Digite o número do CPF no padrão. Ex. 000.000.000-00"
 "Data Admissão","Digite a data no formato DD/MM/AAAA"
 "Endereço","Ex. Av. Rebouças, 1020, ap 23, São Paulo - SP"
 "Peso (kg)","Digite somente os números. Ex. 75"

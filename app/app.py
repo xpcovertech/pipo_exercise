@@ -6,6 +6,8 @@ from flask_session import Session
 from tempfile import mkdtemp
 from functools import wraps
 
+from cpf import isCpfValid
+
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True 
 
@@ -436,18 +438,6 @@ def get_benefit_profile(idBenefit):
 				"companies": companies}
 	return profile
 
-"""
-def get_form_profile(idBenefit, idPerson):
-	person_profile = get_profile(idPerson)
-	benefit_profile = get_benefit_profile(idBenefit) 
-	if not person_profile or not benefit_profile:
-		return None
-	for ben_data in benefit_profile["data"]:
-		for person_data in benefit_profile["data"]:
-			print(ben_data["id"])
-			print(benefit_profile["id"])
-"""
-
 
 
 # INDEX
@@ -520,7 +510,7 @@ def registration(who):
 		elif who == "pessoas":
 			cpf = request.form.get("cpf")
 			benefits = request.form.getlist("benefits")
-			if not cpf or not cpf.isdigit():
+			if not cpf or not isCpfValid(cpf):
 				return "Por favor insira o número de cpf corretamente"
 			idPerson = register_person(name, cpf, benefits)
 			if idPerson: 

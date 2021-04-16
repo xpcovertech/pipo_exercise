@@ -8,7 +8,7 @@
 	<form action="/{{ who }}/cadastro" method="post">
         <div class="form-group">
             <input autocomplete="off" autofocus class="form-control" name="name" placeholder="Digite o nome completo da pessoa para cadastro" type="text"><br>
-            <input autocomplete="off" autofocus class="form-control" name="cpf" placeholder="Digite o número de cpf da pessoa sem pontos ou traços" type="text">
+            <input autocomplete="off" autofocus class="form-control" name="cpf" placeholder="Digite o número do CPF no padrão. Ex. 000.000.000-00" type="text">
         </div>
         {% if benefits|length %}
             <h4>Selecione os Benefícios</h4>

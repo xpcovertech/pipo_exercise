@@ -11,7 +11,7 @@ def create_sysadmin_tables(db):
 	(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	idCompany INTEGER NOT NULL,
 	name VARCHAR(255) NOT NULL,
-	cpf VARCHAR(11) NOT NULL,
+	cpf VARCHAR(14) NOT NULL,
 	timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (idCompany) REFERENCES company(id))
 	""")
