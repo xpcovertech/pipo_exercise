@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/{{ who }}/cadastro">Cadastrar</a> {{ who }}, <a href="/{{ who }}/busca">buscar</a> ou ver uma <a href="/{{ who }}/lista">lista</a>?</p>
+	<br>
+	<h1 style="margin-bottom: 20px;">Perfil: {{ profile["name"] }}</h1>
+	<h4>Dados Principais</h4>
+	<p>Nome: {{ profile["name"] }}<br>
+	ID: {{ profile["id"] }}<br>
+	CPF: {{ profile["cpf"] }}<br>
+	Empresa: {{ profile["company"] }}<br>
+	Nível de Acesso: {{ profile["admin"] }}</p>
+	<h4 style="margin-top: 20px;">Benefícios Cadastrados</h4>
+	{% if profile["benefits"]|length %}
+        {% for benefit in profile["benefits"] %}
+			<a href="/beneficios/{{ benefit['id'] }}/pessoas/{{ profile['id'] }}">{{ benefit['name'] }}</a><br>
+		{% endfor %}
+    {% else %}
+    	<p>Nenhum benefício cadastrado.</p>
+    {% endif %}
+    <a href="/pessoas/editar/{{ profile['id'] }}" class="btn btn-primary btn-sm" style="margin-top: 10px;">Adicionar ou Remover Benefícios</a>
+    <br><br>
+    <h4>Dados Adicionais Cadastrados</h4>
+	{% if profile["data"]|length %}
+        {% for data in profile["data"] %}
+			{{ data['name'] }}: {{ data['data'] }}<br>
+		{% endfor %}
+    {% else %}
+    	<p style="margin-bottom: -5px;">Nenhum dado adicional cadastrado.</p>
+    {% endif %}
+    <a href="/dados/editar/{{ profile['id'] }}" style="margin-top: 18px;" class="btn btn-primary btn-sm">Editar dados</a>
+    <br><br><br>
+    <form action="/{{ who }}/deletar" method="post">
+        <input hidden name="idPerson" value="{{ profile['id'] }}" type="text">
+    	<button class="btn btn-danger btn-sm" type="submit">Deletar Perfil</button>
+    </form>
+	
+{% endblock %}

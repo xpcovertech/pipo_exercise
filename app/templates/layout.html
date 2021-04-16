@@ -24,9 +24,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="navbar-nav mr-auto mt-2">
-                    {% if header["company"] == "Pipo" %}
-                        <li class="nav-item"><a class="nav-link" href="/empresas">Empresas</a></li>
-                    {% endif %}
                     <li class="nav-item"><a class="nav-link" href="/pessoas">Pessoas</a></li>
                     <li class="nav-item"><a class="nav-link" href="/beneficios">Beneficios</a></li>
                 </ul>
@@ -42,9 +39,10 @@
         <main class="container p-5">
             {% block main %}{% endblock %}
         </main>
-        <br><br><br>
+        <br>
         <footer class="small text-center text-muted">
            Made with love by <a href="https://github.com/leorapini" target="_blank">Leo</a> for <a href="https://piposaude.com.br" target="_blank">Pipo</a>.
+           <br><br><br>
         </footer>
     </body>
 

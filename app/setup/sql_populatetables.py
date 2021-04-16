@@ -63,10 +63,11 @@ def populate_datatype(db):
 		reader = csv.DictReader(data)
 		for row in reader:
 			name = row["name"]
+			example = row["example"]
 			db.execute("""INSERT INTO datatype 
-						(name) 
-						VALUES (:name)""",
-						{"name": name})
+						(name, example) 
+						VALUES (:name, :example)""",
+						{"name": name, "example": example})
 	print("Datatype populated!")
 
 def populate_company_benefit(db):
@@ -82,6 +83,19 @@ def populate_company_benefit(db):
 						{"idBenefit": idBenefit, "idCompany": idCompany})
 	print("Company_benefit populated!")
 
+def populate_benefit_datatype(db):
+	print("Populating benefit datatype...")
+	with open("data/benefit_datatype.csv", "r") as data:
+		reader = csv.DictReader(data)
+		for row in reader:
+			idBenefit = row["idBenefit"]
+			idDatatype = row["idDatatype"]
+			db.execute("""INSERT INTO benefitData
+						(idBenefit, idDatatype) 
+						VALUES (:idBenefit, :idDatatype)""",
+						{"idBenefit": idBenefit, "idDatatype": idDatatype})
+	print("Benefit datatype populated!")
+
 if __name__ == '__main__':
 	con = sqlite3.connect(r"../db/pipo.db")
 	cur = con.cursor()
@@ -91,5 +105,6 @@ if __name__ == '__main__':
 	populate_benefit(cur)
 	populate_datatype(cur)
 	populate_company_benefit(cur)
+	populate_benefit_datatype(cur)
 	con.commit()
 	con.close()

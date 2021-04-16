@@ -1,9 +1,9 @@
-name
-"Nome"
-"CPF"
-"Data Admissão"
-"Endereço"
-"Peso (kg)"
-"Altura (cm)"
-"Horas meditadas nos últimos 7 dias"
-"Email"
+name,example
+"Nome","Ex. Ronaldo Farias Azevedo"
+"CPF","Somente os números do CPF. Ex. 0075777754"
+"Data Admissão","Digite a data no formato DD/MM/AAAA"
+"Endereço","Ex. Av. Rebouças, 1020, ap 23, São Paulo - SP"
+"Peso (kg)","Digite somente os números. Ex. 75"
+"Altura (cm)","Digite somente os números em centímetros. Ex. 175"
+"Horas meditadas nos últimos 7 dias","Digite somente o número de horas. Ex. 3"
+"Email","Ex. nome@email.com.br"

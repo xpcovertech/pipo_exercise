@@ -11,7 +11,7 @@
 		<h1>Pessoas da {{ header["company"] }}</h1>
 	{% endif %}
 	{% if who_list|length %}
-		{% for item in who_list %}
+		{% for item in who_list|sort(attribute='name') %}
 			<a href="/{{ who }}/perfil/{{ item['id'] }}">{{ item["name"] }}</a><br>
 		{% endfor %}
 	{% else %}

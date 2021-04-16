@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <p align="right" class="text-muted"><a href="/{{ who }}/cadastro">Cadastrar</a> {{ who }}, <a href="/{{ who }}/busca">buscar</a> ou ver uma <a href="/{{ who }}/lista">lista</a>?</p>
+    <br>
+	<h1>Editar Dados para {{ profile["name"] }}</h1>
+	<form action="/beneficios/editar/{{ profile['id'] }}" method="post">
+        {% if data_list|length %}
+            <h4>Selecione os dados que gostaria de remover ou adicionar.</h4>
+            <br>
+            <h5>Dados Cadastrados</h5>
+            <div class="form-check">
+                {% for data in data_list %}
+                    {% if data in profile["data"] %}
+                        <input class="form-check-input" type="checkbox" id="{{ data['id'] }}" name="idDatatype" value="{{ data['id'] }}" checked>
+                        <label class="form-check-label" for="{{ data['id'] }}">{{ data['name'] }}</label><br>
+                    {% endif %}
+                {% endfor %}
+                <br>
+            </div>
+            <h5>Dados Não Cadastrados</h5>
+            <div class="form-check">
+                {% for data in data_list %}
+                        {% if data not in profile["data"] %}
+                            <input class="form-check-input" type="checkbox" id="{{ data['id'] }}" name="idDatatype" value="{{ data['id'] }}">
+                        <label class="form-check-label" for="{{ data['id'] }}">{{ data['name'] }}</label><br>
+                        {% endif %}
+                {% endfor %}
+            </div>
+            <br>
+        {% endif %}
+        <a href="/beneficios/cadastro/dado" class="btn btn-light btn-sm" type="submit">Inserir Novo Tipo de Dado</a><br><br>
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}

@@ -9,7 +9,6 @@ from functools import wraps
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True 
 
-
 # Ensure responses aren't cached
 @app.after_request
 def after_request(response):
@@ -33,7 +32,10 @@ def remove_session(ex=None):
     db.remove()
 
 
-# UTILITIES 
+
+# UTILITIES
+# UTILITIES
+# UTILITIES
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -42,12 +44,14 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def get_admin_title(nivel):
-	if nivel == 1:
+
+def get_admin_title(level):
+	if level == 1:
 		headtitle = "Admin"
 	else:
 		headtitle = "Colaborador"
 	return headtitle
+
 
 def get_header(session):
 	try: 
@@ -62,295 +66,398 @@ def get_header(session):
 					"id": ""}
 	return header
 
+
+def split_str(word):
+	return [char for char in word]
+
+
 def is_it_bad(string):
-	if not string.isalpha() and not string.isdigit():
-		raise ValueError
+	not_safe = ";\\"
+	for letter in string:
+		if letter in split_str(not_safe):
+			raise ValueError("Not a safe character")
 
 
-# SQL QUERIES
+
+# GENERIC SQL QUERIES
+# GENERIC SQL QUERIES
+# GENERIC SQL QUERIES
 def get_all_table(table):
-	is_it_bad(table)
-	table_all = db.execute("""SELECT * FROM {}""".format(table)).fetchall()
-	return table_all
+	#try:
+		is_it_bad(table)
+		table_all = db.execute("""SELECT * FROM {}""".format(table)).fetchall()
+		return table_all
+	#except:
+	#	raise Exception("Undefined SQL query error")
+
 
 def get_one_from(table, where, data):
-	is_it_bad(table); is_it_bad(where); is_it_bad(data)
-	one_from = db.execute("""SELECT * FROM {} WHERE {} = :{}""".format(table, where, where), 
-						{"{}".format(where): data}).fetchone()
-	return one_from
+	#try:
+		is_it_bad(table); is_it_bad(where); is_it_bad(data)
+		one_from = db.execute("""SELECT * FROM {} WHERE {} = :{}""".format(table, 
+							where, where), {"{}".format(where): data}).fetchone()
+		return one_from
+	#except:
+	#	raise Exception("Undefined SQL query error")
+
 
 def get_all_from(table, where, data):
-	is_it_bad(table); is_it_bad(where); is_it_bad(data)
-	all_from = db.execute("""SELECT * FROM {} WHERE {} = :{}""".format(table, where, where), 
-						{"{}".format(where): data}).fetchall()
-	return all_from
+	#try:
+		is_it_bad(table); is_it_bad(where); is_it_bad(data)
+		all_from = db.execute("""SELECT * FROM {} WHERE {} = :{}""".format(table, 
+							where, where), {"{}".format(where): data}).fetchall()
+		return all_from
+	#except:
+	#	raise Exception("Undefined SQL query error")
+
 
 def search_like(table, like):
-	is_it_bad(table); is_it_bad(like)
-	table_search_like = db.execute("""SELECT * FROM {} WHERE name 
+	try:
+		is_it_bad(table); is_it_bad(like)
+		table_search_like = db.execute("""SELECT * FROM {} WHERE name 
 								LIKE :name""".format(table),
 								{"name": '%'+like+'%'}).fetchall()
-	return table_search_like
-
-
-# BENEFIT QUERIES
-def get_benefits(idCompany):
-	benefits = db.execute("""SELECT id, name FROM benefit WHERE id 
-							IN (SELECT idBenefit FROM companyBenefit WHERE idCompany = :idCompany)
-							GROUP BY name ORDER BY name""", {"idCompany": idCompany}).fetchall()
-	return benefits
-
-def search_benefits(idCompany, like):
-	benefits = db.execute("""SELECT id, name FROM benefit WHERE name LIKE :name AND id IN
-							(SELECT id FROM companyBenefit WHERE idCompany = :idCompany) 
-							ORDER BY name""",
-							{"name": '%'+like+'%', "idCompany": idCompany}).fetchall()
-	return benefits
-
-
-# PERSON QUERIES
-def search_people(idCompany, like):
-	people = db.execute("""SELECT * FROM person WHERE idCompany = :idCompany AND name LIKE :name""", 
-							{"name": '%'+like+'%', "idCompany": idCompany}).fetchall()
-	return people
+		return table_search_like
+	except:
+		raise Exception("Undefined SQL query error")
 
 
 
+# REGISTER QUERIES
+# REGISTER QUERIES
+# REGISTER QUERIES
+def register_person(name, cpf, benefits):
+	is_it_bad(name); is_it_bad(cpf); is_it_bad(benefits)
+	people = get_one_from("person", "cpf", cpf)
+	if people is not None:
+		return False
+	db.execute("""INSERT INTO person (name, idCompany, cpf) 
+					VALUES (:name, :idCompany, :cpf)""", 
+					{"name": name, "idCompany": session["idCompany"], "cpf": cpf})
+	db.commit()
+	new_person = get_one_from("person", "cpf", cpf)
+	if benefits:
+		register_person_benefits(benefits, new_person["id"])
+	return new_person["id"]
 
 
+def register_person_benefits(benefits, idPerson):
+	for benefit in benefits:
+		db.execute("""INSERT INTO personBenefit (idPerson, idBenefit)
+					VALUES (:idPerson, :idBenefit)""",
+					{"idPerson": idPerson, "idBenefit": benefit})
+	db.commit()
 
 
-def search_cpf(table, cpf):
-	if table.isalpha() is not True:
-		return None
-	table_search_cpf = db.execute("""SELECT * FROM {} WHERE cpf = :cpf""".format(table),
-								{"cpf": cpf}).fetchall()
-	return table_search_cpf
+# Confirma se dado já está cadastrado antes // dados vindos do formulário são type(str)
+# Revisar se der tempo
+def register_person_data(idPerson, ids_datatype, data_values):
+	registered_data = db.execute("""SELECT idDatatype FROM personData 
+								WHERE idPerson = :idPerson""",
+								{"idPerson": idPerson}).fetchall()
+	if registered_data == None:
+		registered_data = []
+	for i in range(len(ids_datatype)):
+		if (int(ids_datatype[i]),) in registered_data:
+			if data_values[i] == get_data(idPerson, ids_datatype[i]):
+				pass
+			else:
+				db.execute("""UPDATE personData SET data = :data WHERE 
+					idDatatype = :idDatatype AND idPerson = :idPerson""",
+					{"data": data_values[i], "idDatatype": ids_datatype[i],
+					"idPerson": idPerson})
+		else:
+			db.execute("""INSERT INTO personData (idPerson, idDatatype, data)
+				VALUES (:idPerson, :idDatatype, :data)""",
+				{"idPerson": idPerson, "idDatatype": ids_datatype[i],
+				"data": data_values[i]})
+	db.commit()
 
-def cadastro_company(name):
+
+def register_benefit(name):
 	try:
-		lista_companys = get_all("company")
-		for company in lista_companys:
-			if company["name"].lower() == name.lower():
+		benefits = get_all_table("benefit")
+		for benefit in benefits:
+			if benefit["name"].lower() == name.lower():
 				return False
-		db.execute("""INSERT INTO company (name) VALUES (:name)""", {"name": name})
+		db.execute("""INSERT INTO benefit (name) VALUES (:name)""", {"name": name})
+		new_benefit = get_one_from("benefit", "name", name)
+		db.execute("""INSERT INTO companyBenefit (idCompany, idBenefit) 
+					VALUES (:idCompany, :idBenefit)""", 
+					{"idCompany": session["idCompany"], "idBenefit": new_benefit["id"]})
 		db.commit()
-		return True
+		return new_benefit["id"]
 	except:
 		return False
 
-def cadastro_beneficio(name):
-	try:
-		lista_beneficios = get_all("beneficio")
-		for beneficio in lista_beneficios:
-			if beneficio["name"].lower() == name.lower():
-				return False
-		db.execute("""INSERT INTO beneficio (name) VALUES (:name)""", {"name": name})
-		db.commit()
-		return True
-	except:
-		return False
-
-def get_colaboradores(id_company):
-	colaboradores = db.execute("""SELECT * FROM colaborador WHERE id_company = :id_company 
-								ORDER BY name""", {"id_company": id_company}).fetchall()
-	return colaboradores
-
-def cadastro_colaborador(name, cpf, id_company):
-	try:
-		lista_colaboradores = db.execute("""SELECT name FROM colaborador WHERE cpf = :cpf""",
-										{"cpf": cpf}).fetchone()
-		if lista_colaboradores is not None:
+def register_datatype(name, example):
+	datatypes = get_all_table("datatype")
+	for datatype in datatypes:
+		if datatype["name"].lower() == name.lower():
 			return False
-		db.execute("""INSERT INTO colaborador (name, id_company, cpf, ativo) 
-						VALUES (:name, :id_company, :cpf, :ativo)""", 
-						{"name": name, "id_company": id_company, "cpf": cpf, "ativo": "s"})
-		db.commit()
-		return True
-	except:
-		return False
-
-
-
-
-
-def get_profile_cpf(cpf):
-	person = db.execute("""SELECT * FROM person WHERE cpf = :cpf""",
-							{"cpf": cpf}).fetchone()
-	return person
-
-def get_perfil(id_usuario):
-	colaborador = db.execute("""SELECT * FROM colaborador WHERE id = :id""",
-							{"id": id_usuario}).fetchone()
-	beneficios = get_beneficios_pessoa(colaborador["id"])
-	dados = get_todos_dados_pessoa(colaborador["id"])
-	admin = db.execute("""SELECT nivel FROM admin WHERE id_colaborador = :id_colaborador""",
-						{"id_colaborador": id_usuario}).fetchone()
-	
-	if admin is not None:
-		user_admin = admin["nivel"]
-	else:
-		user_admin = 0
-	perfil = {"name": colaborador["name"],
-				"id": colaborador["id"],
-				"cpf": colaborador["cpf"],
-				"admin": get_admin_title(user_admin),
-				"beneficios": beneficios,
-				"dados": dados}
-	return perfil
-
-def get_beneficios_pessoa(id_pessoa):
-	beneficios = db.execute("""SELECT id, name FROM beneficio WHERE id  
-							IN (SELECT id_beneficio FROM beneficio_colaborador WHERE id_colaborador = :id_colaborador)
-							ORDER BY name""", {"id_colaborador": id_pessoa}).fetchall()
-	return beneficios
-
-def get_perfil_beneficio(id_beneficio):
-	beneficio = db.execute("""SELECT * FROM beneficio WHERE id = :id""",
-							{"id": id_beneficio}).fetchone()
-	dados_beneficio = db.execute("""SELECT id, name FROM tipo_de_dado WHERE id IN
-								(SELECT id_tipo_de_dado FROM dado_beneficio WHERE id_beneficio = :id_beneficio)""",
-								{"id_beneficio": id_beneficio}).fetchall()
-	perfil = {"name": beneficio["name"],
-				"id": beneficio["id"],
-				"dados": dados_beneficio}
-	return perfil
-
-# dados formulário são type(str)
-def update_dados_beneficio(id_beneficio, dados_formulario):
-	dados_beneficio = db.execute("""SELECT id_tipo_de_dado FROM dado_beneficio WHERE id_beneficio = :id_beneficio""",
-								{"id_beneficio": id_beneficio}).fetchall()
-	if dados_beneficio is None:
-		dado_beneficio = []
-	for dado_form in dados_formulario:
-		if (int(dado_form),) in dados_beneficio:
-			pass
-		elif (int(dado_form),) not in dados_beneficio:
-			db.execute("""INSERT INTO dado_beneficio (id_beneficio, id_tipo_de_dado) 
-						VALUES (:id_beneficio, :id_tipo_de_dado)""",
-						{"id_beneficio": id_beneficio, "id_tipo_de_dado": dado_form})
-	for dado_ben in dados_beneficio:
-		if str(dado_ben[0]) not in dados_formulario:
-			db.execute("""DELETE FROM dado_beneficio WHERE id_beneficio = :id_beneficio 
-						AND id_tipo_de_dado = :id_tipo_de_dado""", {"id_beneficio": id_beneficio,
-						"id_tipo_de_dado": dado_ben[0]})
+	db.execute("""INSERT INTO datatype (name, example) VALUES (:name, :example)""",
+				{"name": name, "example": example})
 	db.commit()
 	return True
 
-# dados formulário são type(str)
-def update_dados_pessoa(id_pessoa, beneficios_form):
+
+# DELETE QUERIES
+# DELETE QUERIES
+# DELETE QUERIES
+def delete_person(idPerson):
+	personData = get_all_person_data(idPerson)
+	if personData:
+		db.execute("""DELETE FROM personData WHERE idPerson = :idPerson""",
+					{"idPerson": idPerson}) 
+	personBenefit = get_person_benefits(idPerson)
+	if personBenefit:
+		db.execute("""DELETE FROM personBenefit WHERE idPerson = :idPerson""",
+					{"idPerson": idPerson})
+	db.execute("""DELETE FROM person WHERE id = :id""", {"id": idPerson})
+	db.commit()
+
+
+def delete_benefit(idBenefit):
+	profile = get_benefit_profile(idBenefit)
+	if profile["data"]:
+		db.execute("""DELETE FROM benefitData WHERE idBenefit = :idBenefit""",
+					{"idBenefit": idBenefit}) 
+	if profile["clients"]:
+		db.execute("""DELETE FROM personBenefit WHERE idBenefit = :idBenefit""",
+					{"idBenefit": idBenefit})
+	if profile["companies"]:
+		db.execute("""DELETE FROM companyBenefit WHERE idBenefit = :idBenefit""",
+					{"idBenefit": idBenefit})
+	db.execute("""DELETE FROM benefit WHERE id = :id""", {"id": idBenefit})
+	db.commit()
+
+
+
+# UPDATE QUERIES
+# UPDATE QUERIES
+# UPDATE QUERIES
+def update_benefit_data(idBenefit, ids_datatype):
+	current_datatypes = db.execute("""SELECT idDatatype FROM benefitData 
+								WHERE idBenefit = :idBenefit""",
+								{"idBenefit": idBenefit}).fetchall()
+	if current_datatypes is None:
+		current_datatypes = []
+	for id_data in ids_datatype:
+		if (int(id_data),) in current_datatypes:
+			pass
+		elif (int(id_data),) not in current_datatypes:
+			db.execute("""INSERT INTO benefitData (idBenefit, idDatatype)
+						VALUES (:idBenefit, :idDatatype)""",
+						{"idBenefit": idBenefit, "idDatatype": id_data})
+	for datatype in current_datatypes:
+		if str(datatype[0]) not in ids_datatype:
+			db.execute("""DELETE FROM benefitData WHERE idBenefit = :idBenefit 
+						AND idDatatype = :idDatatype""", {"idBenefit": idBenefit,
+						"idDatatype": datatype[0]})
+	db.commit()
+	return True
+
+
+# Form data is type(str).
+def update_person_benefits(idPerson, ids_benefit):
 	flag = 0
-	beneficios_pessoa = db.execute("""SELECT id_beneficio FROM beneficio_colaborador WHERE id_colaborador = :id_colaborador""",
-								{"id_colaborador": id_pessoa}).fetchall()
-	# Checar se a pessoa possuia benefícios e todos foram retirados
-	if len(beneficios_form) == 0 and beneficios_pessoa is not None:
-		for beneficio in beneficios_pessoa:
-			db.execute("""DELETE FROM beneficio_colaborador WHERE id_colaborador = :id_colaborador
-						AND id_beneficio = :id_beneficio""", {"id_beneficio": beneficio["id_beneficio"],
-						"id_colaborador": id_pessoa})
+	current_benefits = db.execute("""SELECT idBenefit FROM personBenefit 
+								WHERE idPerson = :idPerson""",
+								{"idPerson": idPerson}).fetchall()
+	# Check if person had benefits and got them all taken away
+	if len(ids_benefit) == 0 and current_benefits is not None:
+		for benefit in current_benefits:
+			db.execute("""DELETE FROM personBenefit WHERE idPerson = :idPerson
+						AND idBenefit = :idBenefit""", 
+						{"idBenefit": benefit["idBenefit"], "idPerson": idPerson})
 	else:
-		if beneficios_pessoa is None:
-			beneficios_pessoa = []
-		for beneficio in beneficios_form:
-			if (int(beneficio),) in beneficios_pessoa:
+		if current_benefits is None:
+			current_benefits = []
+		for benefit in ids_benefit:
+			if (int(benefit),) in current_benefits:
 				pass
-			elif (int(beneficio),) not in beneficios_pessoa:
-				db.execute("""INSERT INTO beneficio_colaborador (id_colaborador, id_beneficio) 
-							VALUES (:id_colaborador, :id_beneficio)""",
-							{"id_colaborador": id_pessoa, "id_beneficio": beneficio})
+			elif (int(benefit),) not in current_benefits:
+				db.execute("""INSERT INTO personBenefit (idPerson, idBenefit) 
+							VALUES (:idPerson, :idBenefit)""",
+							{"idPerson": idPerson, "idBenefit": benefit})
 				flag = 1
-		for beneficio_db in beneficios_pessoa:
-			if str(beneficio_db[0]) not in beneficios_form:
-				db.execute("""DELETE FROM beneficio_colaborador WHERE id_beneficio = :id_beneficio 
-							AND id_colaborador = :id_colaborador""", {"id_beneficio": beneficio_db[0],
-							"id_colaborador": id_pessoa})
+		for current in current_benefits:
+			if str(current[0]) not in ids_benefit:
+				db.execute("""DELETE FROM personBenefit WHERE idBenefit = :idBenefit 
+							AND idPerson = :idPerson""", {"idBenefit": current[0],
+							"idPerson": idPerson})
 	db.commit()
 	if flag == 1:
 		return True
 	else:
 		return False
 
-def cadastro_colaborador_beneficios(lista_beneficios, id_colaborador):
-	for beneficio in lista_beneficios:
-		db.execute("""INSERT INTO beneficio_colaborador (id_colaborador, id_beneficio)
-					VALUES (:id_colaborador, :id_beneficio)""",
-					{"id_colaborador": id_colaborador, "id_beneficio": beneficio})
-	db.commit()
 
-def get_dados_beneficios(lista_de_beneficios):
-	lista_dados = []
-	for id_beneficio in lista_de_beneficios:
-		dados_beneficio = db.execute("""SELECT id, name FROM tipo_de_dado WHERE id IN
-								(SELECT id_tipo_de_dado FROM dado_beneficio WHERE id_beneficio = :id_beneficio)""",
-								{"id_beneficio": id_beneficio}).fetchall()
-		for dado in dados_beneficio:
-			if (dado["id"],dado["name"]) not in lista_dados:
-				lista_dados.append((dado["id"],dado["name"]))
-	return lista_dados
 
-# Otimizar para que a busca seja feita só uma vez
-def get_dado(id_colaborador, id_tipo_de_dado):
-	dado_colab = db.execute("""SELECT dado FROM dado_colaborador WHERE id_colaborador = :id_colaborador
-							AND id_tipo_de_dado = :id_tipo_de_dado""",
-							{"id_colaborador": id_colaborador, "id_tipo_de_dado": id_tipo_de_dado}).fetchone()
-	if dado_colab is None:
-		return None
+# SEARCH QUERIES
+# SEARCH QUERIES
+# SEARCH QUERIES
+def search_people(idCompany, like):
+	try:
+		people = db.execute("""SELECT * FROM person WHERE idCompany = :idCompany 
+								AND name LIKE :name""", 
+								{"name": '%'+like+'%', 
+								"idCompany": idCompany}).fetchall()
+		return people
+	except:
+		raise Exception("Undefined SQL query error")
+
+
+def search_benefits(idCompany, like):
+	try:
+		benefits = db.execute("""SELECT id, name FROM benefit WHERE name LIKE :name 
+								AND id IN (SELECT id FROM companyBenefit 
+								WHERE idCompany = :idCompany) 
+								ORDER BY name""",
+								{"name": '%'+like+'%', 
+								"idCompany": idCompany}).fetchall()
+		return benefits
+	except:
+		raise Exception("Undefined SQL query error")
+
+
+
+# GET QUERIES
+# GET QUERIES
+# GET QUERIES
+def get_person_data(profile, datalist):
+	all_data = []
+	for data in datalist:
+		if data[0] == 1:
+			data_value = profile["name"]
+			example = get_data_example(data[0])
+		elif data[0] == 2:
+			data_value = profile["cpf"]
+			example = get_data_example(data[0])
+		else:
+			data_value = get_data(profile["id"], data[0])
+			example = get_data_example(data[0])
+		all_data.append({"idDatatype": data[0], "name": data[1], "data": data_value,
+							"example": example})
+	return all_data
+
+def get_all_person_data(idPerson):
+	all_data = db.execute("""SELECT name, idDatatype, data 
+							FROM personData JOIN datatype ON idDatatype = id
+							WHERE idPerson = :idPerson""",
+							{"idPerson": idPerson}).fetchall()
+	return all_data
+
+def get_data_example(idDatatype):
+	data_example = db.execute("""SELECT example FROM datatype WHERE id = :id""",
+								{"id": idDatatype}).fetchone()
+	return data_example[0]
+
+def get_data(idPerson, idDatatype):
+	person_data = db.execute("""SELECT data FROM personData WHERE idPerson = :idPerson
+							AND idDatatype = :idDatatype""",
+							{"idPerson": idPerson, "idDatatype": idDatatype}).fetchone()
+	if person_data is None: 
+		return None 
 	else:
-		return dado_colab[0]
-
-def get_todos_dados_pessoa(id_pessoa):
-	todos_dados = db.execute("""SELECT name, id_colaborador, id_tipo_de_dado, dado 
-							FROM dado_colaborador JOIN tipo_de_dado ON id_tipo_de_dado = id
-							WHERE id_colaborador = :id_colaborador""",
-							{"id_colaborador": id_pessoa}).fetchall()
-	return todos_dados
-
-def get_dados(lista_dados, id_usuario):
-	dados_cadastro = []
-	perfil = get_perfil(id_usuario)
-	for dado in lista_dados:
-		if dado[0] == 1:
-			dado_cadastro = perfil["name"]
-		elif dado[0] == 2:
-			dado_cadastro = perfil["cpf"]
-		else:
-			dado_cadastro = get_dado(id_usuario, dado[0])
-		dados_cadastro.append({"id": dado[0], "name": dado[1], "dado": dado_cadastro})
-	return dados_cadastro
-
-# Confirma se dado já está cadastrado antes // dados vindos do formulário são type(str)
-def cadastro_dados_colaborador_beneficio(id_colaborador, ids_tipo_de_dado, valores_dados):
-	tipos_de_dado = db.execute("""SELECT id_tipo_de_dado FROM dado_colaborador 
-								WHERE id_colaborador = :id_colaborador""",
-								{"id_colaborador": id_colaborador}).fetchall()
-	if tipos_de_dado == None:
-		tipos_de_dado = []
-	for i in range(len(ids_tipo_de_dado)):
-		if (int(ids_tipo_de_dado[i]),) in tipos_de_dado:
-			if valores_dados[i] == get_dado(id_colaborador, ids_tipo_de_dado[i]):
-				pass
-			else:
-				db.execute("""UPDATE dado_colaborador SET dado = :dado WHERE 
-					id_tipo_de_dado = :id_tipo_de_dado, id_colaborador = :id_colaborador""",
-					{"dado": valores_dados[i], "id_tipo_de_dado": ids_tipo_de_dado[i],
-					"id_colaborador": id_colaborador})
-		else:
-			db.execute("""INSERT INTO dado_colaborador (id_colaborador, id_tipo_de_dado, dado)
-				VALUES (:id_colaborador, :id_tipo_de_dado, :dado)""",
-				{"id_colaborador": id_colaborador, "id_tipo_de_dado": ids_tipo_de_dado[i],
-				"dado": valores_dados[i]})
-	db.commit()
+		return person_data[0]
 
 
+def get_person_benefits(idPerson):
+	benefits = db.execute("""SELECT id, name FROM benefit WHERE id  
+							IN (SELECT idBenefit FROM personBenefit 
+							WHERE idPerson = :idPerson)
+							ORDER BY name""", {"idPerson": idPerson}).fetchall()
+	return benefits
+
+
+def get_profile(idPerson):
+	person = get_one_from("person", "id", str(idPerson))
+	benefits = get_person_benefits(idPerson)
+	personData = get_all_person_data(idPerson)
+	admin = get_one_from("admin", "idPerson", str(idPerson))
+	if admin is not None:
+		level = admin["level"]
+	else:
+		level = 0
+	profile = {"name": person["name"],
+				"id": person["id"],
+				"cpf": person["cpf"],
+				"company": session["company"],
+				"admin": get_admin_title(admin),
+				"benefits": benefits,
+				"data": personData}
+	return profile
+
+
+def get_company_benefits(idCompany):
+	try:
+		benefits = db.execute("""SELECT id, name FROM benefit WHERE id 
+								IN (SELECT idBenefit FROM companyBenefit 
+								WHERE idCompany = :idCompany)
+								GROUP BY name ORDER BY name""", 
+								{"idCompany": idCompany}).fetchall()
+		return benefits
+	except:
+		raise Exception("Undefined SQL query error")
+
+
+def get_benefits_data(benefits):
+	all_data = []
+	for idBenefit in benefits:
+		benefits_data = db.execute("""SELECT id, name FROM datatype WHERE id IN
+								(SELECT idDatatype FROM benefitData 
+								WHERE idBenefit = :idBenefit)""",
+								{"idBenefit": idBenefit}).fetchall()
+		for data in benefits_data:
+			if (data["id"],data["name"]) not in all_data:
+				all_data.append((data["id"],data["name"]))
+	return all_data
+
+
+def get_benefit_profile(idBenefit):
+	benefit = get_one_from("benefit", "id", str(idBenefit))
+	benefitData = db.execute("""SELECT id, name, example FROM datatype WHERE id IN
+								(SELECT idDatatype FROM benefitData 
+								WHERE idBenefit = :idBenefit)""",
+								{"idBenefit": idBenefit}).fetchall()
+	clients = db.execute("""SELECT id, name FROM person WHERE idCompany = :idCompany 
+							AND id IN (SELECT idPerson FROM personBenefit 
+							WHERE idBenefit = :idBenefit) ORDER BY name""", 
+							{"idCompany": session["idCompany"] ,
+							"idBenefit": idBenefit}).fetchall()
+	companies = db.execute("""SELECT idCompany FROM companyBenefit 
+							WHERE idBenefit = :idBenefit""",
+							{"idBenefit": idBenefit}).fetchall()
+	profile = {"name": benefit["name"],
+				"id": benefit["id"],
+				"data": benefitData,
+				"clients": clients,
+				"companies": companies}
+	return profile
+
+"""
+def get_form_profile(idBenefit, idPerson):
+	person_profile = get_profile(idPerson)
+	benefit_profile = get_benefit_profile(idBenefit) 
+	if not person_profile or not benefit_profile:
+		return None
+	for ben_data in benefit_profile["data"]:
+		for person_data in benefit_profile["data"]:
+			print(ben_data["id"])
+			print(benefit_profile["id"])
+"""
 
 
 
-
+# INDEX
+# INDEX
 # INDEX
 @app.route("/", methods=['GET'])
 @login_required
 def index():
 	return render_template("index.html", header = get_header(session))
+
 
 # HOME
 @app.route("/<who>", methods=['GET'])
@@ -360,20 +467,20 @@ def home(who):
 		return "Essa página não existe"
 	return render_template("home.html", header = get_header(session), who = who)
 
+
 # LIST
 @app.route("/<who>/lista", methods=['GET'])
 @login_required
 def list(who):
-	if who == "empresas":
-		who_list = get_all_table("company")
-	elif who == "beneficios":
-		who_list = get_benefits(session["idCompany"])
+	if who == "beneficios":
+		who_list = get_company_benefits(session["idCompany"])
 	elif who == "pessoas":
 		who_list = get_all_from("person", "idCompany", str(session["idCompany"]))
 	else:
 		return "Essa página não existe"
 	return render_template("list.html", header = get_header(session), who = who,
 										who_list = who_list)
+
 
 # SEARCH
 @app.route("/<who>/busca", methods=['GET', 'POST'])
@@ -383,184 +490,191 @@ def search(who):
 		name = request.form.get("name")
 		if not name:
 			return "Por favor insira um nome"
-		if who == "empresas":
-			who_list = search_like("company", name)
-		elif who == "beneficios":
+		if who == "beneficios":
 			who_list = search_benefits(session["idCompany"], name)
 		elif who == "pessoas":
 			who_list = search_people(session["idCompany"], name)
 		else:
 			return "Essa página não existe"
-		return render_template("searchresult.html", header = get_header(session), who = who,
-										who_list = who_list)
+		return render_template("searchresult.html", header = get_header(session),
+													who = who,who_list = who_list)
 	else:
-		return render_template("search.html", header = get_header(session), who = who)
+		return render_template("search.html", header = get_header(session), 
+												who = who)
 
 
-
-@app.route("/companys/busca", methods=["GET", "POST"])
+# REGISTRATION
+@app.route("/<who>/cadastro", methods=['GET', 'POST'])
 @login_required
-def companysbusca():
+def registration(who):
 	if request.method == "POST":
-		if not request.form.get("name"):
-			return "Por favor insira o name da company"
-		return render_template("companysresultado.html", header = get_header(session),
-							lista_companys = search_like("company", request.form.get("name")))
-	else:
-		return render_template("companysbusca.html", header = get_header(session))
-
-"""
-# COMPANY
-@app.route("/companys/cadastro", methods=["GET", "POST"])
-@login_required
-def companyscadastro():
-	if request.method == "POST":
-		if session["admin"] == 0:
-			return "Você não está autorizado a incluir novas companys"
-		if not request.form.get("name"):
-			return "Por favor insira o name da company"
-		if cadastro_company(request.form.get("name")):
-			return redirect("/companys/lista")
-		else:
-			return "Erro no cadastro. Talvez essa company já esteja cadastrada."
-	else:
-		return render_template("companyscadastro.html", header = get_header(session))
-
-
-# PESSOAS
-
-@app.route("/pessoas/cadastro", methods=["GET", "POST"])
-@login_required
-def pessoascadastro():
-	if request.method == "POST":
-		if session["admin"] == 0:
-			return "Você não está autorizado a incluir novas pessoas"
 		name = request.form.get("name")
-		cpf = request.form.get("cpf")
-		lista_beneficios = request.form.getlist("id_beneficio") 
-		if not name or not cpf:
-			return "Por favor complete o formulário com todos os dados"
-		if cpf.isdigit() is not True:
-			return "O cpf deve conter somente números"
-		if cadastro_colaborador(name, cpf, session["idCompany"]):
-			perfil = get_perfil_cpf(cpf)
-			if lista_beneficios:
-				cadastro_colaborador_beneficios(lista_beneficios, perfil["id"])
-				lista_dados = get_dados_beneficios(lista_beneficios)
-				dados = get_dados(lista_dados, perfil["id"])
-				return render_template("colabcadastrobeneficio.html", 
-								header = get_header(session),
-								perfil = perfil, lista_dados = dados)
-			return redirect("/pessoas/perfil/{}".format(perfil["id"]))
+		if not name:
+			return "Por favor insira um nome"
+		if who == "beneficios":
+			idBenefit = register_benefit(name)
+			if idBenefit:
+				return redirect("/{}/perfil/{}".format(who, idBenefit))
+			else:
+				return "Erro no cadastro. Talvez esse benefício já esteja cadastrado."
+		elif who == "pessoas":
+			cpf = request.form.get("cpf")
+			benefits = request.form.getlist("benefits")
+			if not cpf or not cpf.isdigit():
+				return "Por favor insira o número de cpf corretamente"
+			idPerson = register_person(name, cpf, benefits)
+			if idPerson: 
+				if benefits: # because a person could have been registered without it
+					profile = get_profile(idPerson)
+					benefits_data = get_benefits_data(benefits)
+					person_data = get_person_data(profile, benefits_data)
+					return render_template("registerpersondata.html",
+										header = get_header(session),
+										profile = profile,
+										person_data = person_data)
+				return redirect("/{}/lista".format(who))
 		else:
-			return "Erro no cadastro. Talvez essa pessoa já esteja cadastrada."
+			return "Essa página não existe"
 	else:
-		return render_template("colaboradorescadastro.html", header = get_header(session),
-								lista_beneficios = get_beneficios(session["idCompany"]))
+		if who == "pessoas":
+			benefits = get_company_benefits(session["idCompany"])
+			return render_template("registerperson.html", 
+									header = get_header(session), who = who,
+									benefits = benefits)
+		elif who == "beneficios":
+			return render_template("registration.html", 
+									header = get_header(session), who = who)
+		else:
+			return "Essa página não existe"
 
-@app.route("/pessoas/cadastro/beneficio", methods=["GET", "POST"])
+
+# REGISTER PERSON DATA
+@app.route("/pessoas/cadastro/beneficio", methods=['POST'])
 @login_required
-def pessoascadastrobeneficio():
-	if request.method == "POST":
-		id_colaborador = request.form.get("id_colaborador")
-		ids_tipo_de_dado = request.form.getlist("id_tipo_de_dado")
-		valores_dados = request.form.getlist("valor_dado")
-		if ids_tipo_de_dado and valores_dados:
-			cadastro_dados_colaborador_beneficio(id_colaborador, ids_tipo_de_dado, valores_dados)
-		return redirect("/pessoas/perfil/{}".format(id_colaborador))
+def regiterpersondata():
+	idPerson = request.form.get("idPerson")
+	ids_datatype = request.form.getlist("idDatatype")
+	data_values = request.form.getlist("data_value")
+	if ids_datatype and data_values:
+		register_person_data(idPerson, ids_datatype, data_values)
+		return redirect("/pessoas/perfil/{}".format(idPerson))
 	else:
 		return redirect("/pessoas/lista")
 
 
-@app.route("/pessoas/perfil/<id_pessoa>", methods=["GET"])
+# REGISTER NEW DATATYPE
+@app.route("/beneficios/cadastro/dado", methods=['GET','POST'])
 @login_required
-def pessoasperfil(id_pessoa):
-	beneficios_pessoa = get_beneficios_pessoa(id_pessoa)
-	return render_template("colaboradoresperfil.html", header = get_header(session),
-								perfil = get_perfil(id_pessoa))
-
-@app.route("/pessoas/editar/<id_pessoa>", methods=["GET", "POST"])
-@login_required
-def pessoaseditar(id_pessoa):
+def registernewdatatype():
 	if request.method == "POST":
-		if session["admin"] == 0:
-			return "Você não está autorizado a editar perfis"
-		if update_dados_pessoa(request.form.get("id"), request.form.getlist("id_beneficio")):
-			perfil = get_perfil(request.form.get("id"))
-			lista_dados = get_dados_beneficios(request.form.getlist("id_beneficio"))
-			dados = get_dados(lista_dados, perfil["id"])
-			return render_template("colabcadastrobeneficio.html", 
-								header = get_header(session),
-								perfil = perfil, lista_dados = dados)
-		return redirect("/pessoas/perfil/{}".format(id_pessoa))
-	else:
-		if session["admin"] == 0:
-			return "Você não está autorizado a editar perfis"
-		return render_template("colaboradoreseditar.html", header = get_header(session),
-								perfil = get_perfil(id_pessoa), 
-								lista_beneficios = get_beneficios(session["idCompany"]))
-
-
-
-# BENEFÍCIOS
-
-@app.route("/beneficios/lista", methods=['GET'])
-@login_required
-def beneficioslista():
-	return render_template("beneficioslista.html", header = get_header(session),
-							lista_beneficios = get_all("beneficio"))
-
-@app.route("/beneficios/busca", methods=["GET", "POST"])
-@login_required
-def beneficiosbusca():
-	if request.method == "POST":
-		if not request.form.get("name"):
-			return "Por favor insira o name do beneficio"
-		return render_template("beneficiosresultado.html", header = get_header(session),
-							lista_beneficios = search_like("beneficio", request.form.get("name")))
-	else:
-		return render_template("beneficiosbusca.html", header = get_header(session))
-
-@app.route("/beneficios/cadastro", methods=["GET", "POST"])
-@login_required
-def beneficioscadastro():
-	if request.method == "POST":
-		if session["admin"] == 0:
-			return "Você não está autorizado a incluir novos beneficios"
-		if not request.form.get("name"):
-			return "Por favor insira o name do beneficio"
-		if cadastro_beneficio(request.form.get("name")):
+		name = request.form.get("name")
+		example = request.form.get("example")
+		if not name or not example:
+			return "Você precisa preencher os dois campos"
+		if register_datatype(name, example):
 			return redirect("/beneficios/lista")
 		else:
-			return "Erro no cadastro. Talvez esse beneficio já esteja cadastrado."
+			return "Houve um erro no cadastro, por favor tente novamente"
 	else:
-		return render_template("beneficioscadastro.html", header = get_header(session))
+		data_list = get_all_table("datatype")
+		return render_template("registernewdatatype.html", 
+											header = get_header(session),
+											data_list = data_list)
 
-@app.route("/beneficios/perfil/<id_beneficio>", methods=["GET"])
-@login_required
-def beneficiosperfil(id_beneficio):
-	return render_template("beneficiosperfil.html", header = get_header(session),
-								perfil = get_perfil_beneficio(id_beneficio))
 
-@app.route("/beneficios/editar/<id_beneficio>", methods=["GET", "POST"])
+# BENEFIT FORM PROFILE
+@app.route("/beneficios/<idBenefit>/pessoas/<idPerson>", methods=['GET'])
 @login_required
-def beneficioseditar(id_beneficio):
+def benefitformprofile(idBenefit, idPerson):
+	benefit_profile = get_benefit_profile(idBenefit)
+	person_profile = get_profile(idPerson)
+	# checar se colaborador está cadastrado no plano antes de prosseguir
+	return render_template("benefitformprofile.html", header = get_header(session),
+												benefit = benefit_profile,
+												person = person_profile)
+
+
+# PROFILES
+@app.route("/<who>/perfil/<idWho>", methods=['GET'])
+@login_required
+def profile(who, idWho):
+	if who == "pessoas":
+		profile = get_profile(idWho)
+		if not profile:
+			return "Esse perfil não existe"
+		return render_template("personprofile.html", header = get_header(session),
+								profile = profile, who = who)
+	elif who == "beneficios":
+		profile = get_benefit_profile(idWho)
+		if not profile:
+			return "Esse perfil não existe"
+		return render_template("benefitprofile.html", header = get_header(session),
+								profile = profile, who = who)
+	else:
+		return redirect("/pessoas/lista")
+
+
+# EDIT PROFILES
+@app.route("/<who>/editar/<idWho>", methods=['GET', 'POST'])
+@login_required
+def editprofile(who, idWho):
 	if request.method == "POST":
-		if session["admin"] == 0:
-			return "Você não está autorizado a editar beneficios"
-		if not request.form.get("id_tipo_de_dado"):
-			return "Você não pode eliminar todos os dados."
-		if update_dados_beneficio(id_beneficio, request.form.getlist("id_tipo_de_dado")):
-			return redirect("/beneficios/perfil/{}".format(id_beneficio))
-		else:
-			return "erro no update do beneficio"
+		if who == "pessoas":
+			ids_benefit = request.form.getlist("idBenefit")
+			if update_person_benefits(idWho, ids_benefit):
+				profile = get_profile(idWho)
+				benefits_data = get_benefits_data(ids_benefit)
+				person_data_to_fill = get_person_data(profile, benefits_data)
+				return render_template("registerpersondata.html", 
+								person_data = person_data_to_fill, 
+								header = get_header(session),
+								profile = profile, who = who)
+			return redirect("/pessoas/perfil/{}".format(idWho))
+		elif who == "beneficios":
+			ids_datatype = request.form.getlist("idDatatype")
+			if not ids_datatype:
+				return "Você não pode eliminar todos os dados"
+			update_benefit_data(idWho, ids_datatype)
+			return redirect("/beneficios/perfil/{}".format(idWho))
 	else:
-		if session["admin"] == 0:
-			return "Você não está autorizado a editar beneficios"
-		return render_template("beneficioseditar.html", header = get_header(session),
-								perfil = get_perfil_beneficio(id_beneficio), 
-								lista_dados = get_all("tipo_de_dado"))
-"""
+		if who == "pessoas":
+			return render_template("editpersonbenefits.html", 
+								header = get_header(session),
+								profile = get_profile(idWho),
+								benefits_list = get_company_benefits(session["idCompany"]))
+		elif who == "dados":
+			profile = get_profile(idWho)
+			return render_template("registerpersondata.html", 
+									person_data = profile["data"], 
+									profile = profile, who = "pessoas", 
+									header = get_header(session))
+		elif who == "beneficios":
+			profile = get_benefit_profile(idWho)
+			if not profile:
+				return "Esse perfil não existe"
+			return render_template("editbenefit.html", header = get_header(session),
+									profile = profile, who = who, 
+									data_list = get_all_table("datatype"))
+		else:
+			return redirect("/pessoas/lista")
+
+# DELETE PROFILE
+@app.route("/<who>/deletar", methods=['POST'])
+@login_required
+def deleteprofile(who):
+	if request.method == "POST":
+		if who == "pessoas":
+			idPerson = request.form.get("idPerson")
+			if idPerson:
+				delete_person(idPerson)
+			return redirect("/pessoas/lista")
+		elif who == "beneficios":
+			idBenefit = request.form.get("idBenefit")
+			if idBenefit:
+				delete_benefit(idBenefit)
+			return redirect("/pessoas/lista")
+		else:
+			return "Essa página não existe"
 
 
 
@@ -576,6 +690,10 @@ def login():
 		person = get_one_from("person", "cpf", cpf)
 		if person is None:
 			return "Número de CPF não encontrado"
+		else:
+			admin = get_one_from("admin", "idPerson", str(person["id"]))
+			if admin is None:
+				return "Você não está autorizado a entrar no sistema"
 		company = get_one_from("company", "id", str(person["idCompany"]))
 		session["id"] = person["id"]
 		session["idCompany"] = person["idCompany"]

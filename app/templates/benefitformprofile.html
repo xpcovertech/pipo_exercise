@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <p align="right" class="text-muted"><a href="/pessoas/cadastro">Cadastrar</a> pessoas, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
+    <hr style="margin-top: 40px; margin-bottom: 50px;">
+	<h1>{{ benefit["name"] }}</h1>
+	<h4 style="margin-bottom: 30px;">Ficha de Cadastro de {{ person["name"] }}</h4>
+	{% if benefit["data"]|length %}
+		<form action="/" method="post">
+		{% for benefit in benefit["data"] %}
+			{% for person in person["data"] %}
+				{% if benefit['id'] == person['idDatatype'] %}
+			   		<div class="form-group row">
+			        	<label for="id" class="col-sm-2 col-form-label">{{ benefit['name'] }}</label>
+			        	<div class="col-sm-10">
+			            	<input readonly class="form-control" name="id" value="{{ person['data'] }}" type="text">
+			            </div>
+			        </div>
+					<br>
+				{% endif %}
+			{% endfor %}
+		{% endfor %}
+		</form>
+	{% endif %}
+	<hr style="margin-top: 40px;">
+	
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <p align="right" class="text-muted"><a href="/{{ who }}/cadastro">Cadastrar</a> {{ who }}, <a href="/{{ who }}/busca">buscar</a> ou ver uma <a href="/{{ who }}/lista">lista</a>?</p>
+    <br>
+	<h1>Cadastro Pessoa</h1>
+	<p class="text-muted">ATENÇÃO: Antes de prosseguir, confira através da <a href="/{{ who }}/busca">busca</a> se a pessoa já não foi cadastrada.</p>
+	<form action="/{{ who }}/cadastro" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="name" placeholder="Digite o nome completo da pessoa para cadastro" type="text"><br>
+            <input autocomplete="off" autofocus class="form-control" name="cpf" placeholder="Digite o número de cpf da pessoa sem pontos ou traços" type="text">
+        </div>
+        {% if benefits|length %}
+            <h4>Selecione os Benefícios</h4>
+            <div class="form-check">
+                {% for benefit in benefits|sort(attribute='name') %}
+                    <input class="form-check-input" type="checkbox" id="{{ benefit['id'] }}" name="benefits" value="{{ benefit['id'] }}">
+                    <label class="form-check-label" for="{{ benefit['id'] }}">{{ benefit['name'] }}</label>
+                    <br>
+                {% endfor %}
+            </div>
+            <br>
+        {% endif %}
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}

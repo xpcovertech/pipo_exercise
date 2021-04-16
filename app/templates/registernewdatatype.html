@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <p align="right" class="text-muted"><a href="/beneficios/cadastro">Cadastrar</a> beneficios, <a href="/beneficios/busca">buscar</a> ou ver uma <a href="/beneficios/lista">lista</a>?</p>
+    <br>
+	<h1>Dados para Cadastro de Benefício</h1>
+    <h4 style="margin-top: 20px;">Dados já Cadastrados</h4>
+    {% if data_list|length %}
+        {% for data in data_list|sort(attribute='name') %}
+            {{ data['name'] }}<br>
+        {% endfor %}
+    {% else %}
+        <p>Não existem dados cadastrados.</p>
+    {% endif %}
+    <br>
+    <h4>Novo Dado</h4>
+	<form action="/beneficios/cadastro/dado" method="post">
+        <div class="form-group row">
+            <label for="name" class="col-sm-2 col-form-label">Nome:</label><br>
+            <div class="col-sm-10">
+                <input autocomplete="off" autofocus class="form-control" id="name" name="name" placeholder="Nome do tipo de dado. Ex. Data de Nascimento" type="text"><br>
+            </div>
+            <label for="example" class="col-sm-2 col-form-label">Exemplo:</label><br>
+            <div class="col-sm-10">
+                <input autocomplete="off" class="form-control" id="example" name="example" placeholder="Exemplo e formato de preenchimento. Ex. DD/MM/AAAA" type="text">
+            </div>
+            <br>
+        </div>
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}

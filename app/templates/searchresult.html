@@ -5,7 +5,7 @@
 	<br>
 	<h1>Resultado da Busca</h1>
 	{% if who_list|length %}
-		{% for item in who_list %}
+		{% for item in who_list|sort(attribute='name') %}
 			<a href="/{{ who }}/perfil/{{ item['id'] }}"}}>{{ item["name"] }}</a><br>
 		{% endfor %}
 	{% else %}

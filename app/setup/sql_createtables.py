@@ -33,7 +33,8 @@ def create_pipo_tables(db):
 	""")
 	db.execute("""CREATE TABLE IF NOT EXISTS datatype
 	(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	name VARCHAR(100) NOT NULL)
+	name VARCHAR(100) NOT NULL,
+	example VARCHAR(144) NOT NULL)
 	""")
 	db.execute("""CREATE TABLE IF NOT EXISTS benefitData
 	(idBenefit INTEGER NOT NULL,
