@@ -3,31 +3,39 @@
 {% block main %}
 	<p align="right" class="text-muted"><a href="/{{ who }}/cadastro">Cadastrar</a> {{ who }}, <a href="/{{ who }}/busca">buscar</a> ou ver uma <a href="/{{ who }}/lista">lista</a>?</p>
 	<br>
-	<h1 style="margin-bottom: 20px;">Perfil: {{ profile["name"] }}</h1>
-	<h4 style="margin-top: 10px;">Dados Necessários para Cadastro no Plano</h4>
-	{% if profile["data"]|length %}
-		{% for data in profile["data"] %}
-			{{ data['name'] }}<br>
-		{% endfor %}
-	{% else %}
-		<p>Nenhum dado cadastrado.</p>
-	{% endif %}
-	<a href="/beneficios/editar/{{ profile['id'] }}" class="btn btn-primary btn-sm" style="margin-top: 16px;">Editar Dados</a>
-	<br><br>
-	<h4>Pessoas Cadastradas no Plano</h4>
-	{% if profile["clients"]|length %}
-		{% for person in profile["clients"] %}
-			<a href="/beneficios/{{ profile['id'] }}/pessoas/{{ person['id'] }}">{{ person['name'] }}</a><br>
-		{% endfor %}
-	{% else %}
-		<p style="margin-bottom: -5px;">Nenhuma pessoa cadastrada.</p>
-	{% endif %}
-	<br>
-	<a href="/pessoas/lista" class="btn btn-primary btn-sm">Adicionar Pessoas</a>
-	<br><br><br>
-	<form action="/{{ who }}/deletar" method="post">
-        <input hidden name="idBenefit" value="{{ profile['id'] }}" type="text">
-    	<button class="btn btn-danger btn-sm" type="submit">Deletar Perfil</button>
-    </form>
+	<h1 style="margin-bottom: 20px;">{{ profile["name"] }}</h1>
+	<div class="container">
+  		<div class="row">
+    		<div class="col">
+    			<h4>Dados Necessários para Cadastro no Plano</h4>
+				{% if profile["data"]|length %}
+					{% for data in profile["data"] %}
+						<i>- {{ data['name'] }}</i><br>
+					{% endfor %}
+				{% else %}
+					<p>Nenhum dado cadastrado.</p>
+				{% endif %}
+				<a href="/beneficios/editar/{{ profile['id'] }}" class="btn btn-primary btn-sm" style="margin-top: 16px;">Editar Dados</a>
+			</div>
+    		<div class="col">
+    			<h4>Pessoas Cadastradas no Plano</h4>
+				{% if profile["clients"]|length %}
+				<p style="margin-bottom: 7px; margin-top: -7px;"  class="text-muted">Clique no nome para ver a ficha de cadastro.</p>
+					{% for person in profile["clients"] %}
+						<a href="/beneficios/{{ profile['id'] }}/pessoas/{{ person['id'] }}">{{ person['name'] }}</a><br>
+					{% endfor %}
+				{% else %}
+					<p style="margin-bottom: -5px;">Nenhuma pessoa cadastrada.</p>
+				{% endif %}
+				<a href="/pessoas/lista" style="margin-top: 17px;" class="btn btn-primary btn-sm">Adicionar Pessoas</a>
+    		</div>
+    	</div>
+    </div>
+    <div class="container" style="margin-top: 30px; text-align: right;">
+    	<form action="/{{ who }}/deletar" method="post">
+        	<input hidden name="idBenefit" value="{{ profile['id'] }}" type="text">
+    		<button class="btn btn-danger btn-sm" type="submit">Deletar Plano</button>
+    	</form>
+    </div>
 	
 {% endblock %}

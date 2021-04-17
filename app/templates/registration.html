@@ -6,8 +6,11 @@
 	<h1>Cadastro {{ who }}</h1>
 	<p class="text-muted">ATENÇÃO: Antes de prosseguir, confira através da <a href="/{{ who }}/busca">busca</a> se o nome já não foi cadastrado.</p>
 	<form action="/{{ who }}/cadastro" method="post">
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="name" placeholder="Digite o nome para cadastro" type="text">
+        <div class="form-group row">
+            <label for="name" class="col-sm-2 col-form-label">Nome:</label>
+            <div class="col-sm-10">
+            	<input autocomplete="off" autofocus class="form-control" name="name" placeholder="Digite o nome para cadastro" type="text">
+            </div>
         </div>
         <button class="btn btn-primary" type="submit">Enviar</button>
     </form>

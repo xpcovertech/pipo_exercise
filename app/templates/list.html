@@ -3,14 +3,13 @@
 {% block main %}
 	<p align="right" class="text-muted"><a href="/{{ who }}/cadastro">Cadastrar</a> {{ who }}, <a href="/{{ who }}/busca">buscar</a> ou ver uma <a href="/{{ who }}/lista">lista</a>?</p>
 	<br>
-	{% if who == "empresas" %}
-		<h1>Clientes da Pipo ❤️</h1>
-	{% elif who == "beneficios" %}
+	{% if who == "beneficios" %}
 		<h1>Benefícios Disponíveis</h1>
 	{% else %}
 		<h1>Pessoas da {{ header["company"] }}</h1>
 	{% endif %}
 	{% if who_list|length %}
+		<p style="margin-bottom: 7px; margin-top: -7px;" class="text-muted">Clique no nome para ver o perfil.</p>
 		{% for item in who_list|sort(attribute='name') %}
 			<a href="/{{ who }}/perfil/{{ item['id'] }}">{{ item["name"] }}</a><br>
 		{% endfor %}

@@ -5,7 +5,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+        <!-- documentation at http://getbootstrap.com/docs/4.1/ -->
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/static/styles.css">
 
         <link href="/static/favicon.png" rel="icon">
 
@@ -36,10 +38,18 @@
                 </ul>
             </div>
         </nav>
+
+        {% if whoops %}
+            <header>
+                <div class="alert alert-primary border text-center" style="margin-bottom: 0px;" role="alert">
+                    {{ whoops }}
+                </div>
+            </header>
+        {% endif %}
+
         <main class="container p-5">
             {% block main %}{% endblock %}
         </main>
-        <br>
         <footer class="small text-center text-muted">
            Made with love by <a href="https://github.com/leorapini" target="_blank">Leo</a> for <a href="https://piposaude.com.br" target="_blank">Pipo</a>.
            <br><br><br>
