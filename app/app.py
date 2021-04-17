@@ -8,10 +8,28 @@ from functools import wraps
 
 from cpf import isCpfValid
 
+'''
+This is a webapp that manages employees' benefits.
+For more visit https://github.com/leorapini/pipo_exercise
+Code written by Leo Rapini
+
+Names:
+Person is every person registered in the database. 
+Benefit is the name of any "benefício". Ex. Plano Dental Sorriso.
+Company is an employer of of persons that have benefists registered to them,
+allowing person to be enrolled in those benefits. 
+
+Type of Data is the kind of data benefits require for someone to be enrolled.
+Data is any value vinculated to a type of data. Ex. Type of Data: Nome or Peso.
+
+Please check the SQL schema in the folder Documentation before reading the code. 
+It will be a more pleasant experience, I promise. 
+'''
+
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True 
 
-# Ensure responses aren't cached
+# Set responses not to be cached
 @app.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -19,16 +37,17 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
-# Configure session to use filesystem (instead of signed cookies)
+# Set sessions to use filesystem (not cookies)
 app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Create Database engine and Session
+# Create database engine and session
 engine = create_engine('sqlite:///db/pipo.db')
 db = scoped_session(sessionmaker(bind=engine))
 
+# Ensure the app is "refreshed" after every request
 @app.teardown_request
 def remove_session(ex=None):
     db.remove()
@@ -38,6 +57,7 @@ def remove_session(ex=None):
 # UTILITIES
 # UTILITIES
 # UTILITIES
+# Wrap to allow only logged users to see pages
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -48,6 +68,7 @@ def login_required(f):
 
 
 def get_admin_title(level):
+	""" Receives admin level (int) and returns their respective description (str)."""
 	if level == 1:
 		headtitle = "Admin"
 	else:
@@ -56,6 +77,8 @@ def get_admin_title(level):
 
 
 def get_header(session):
+	""" Receives session (dict) generated at login and returns the header (dict) 
+	that will be used across the website"""
 	try: 
 		header = {"name": session["name"],
 					"company": session["company"],
@@ -70,6 +93,8 @@ def get_header(session):
 
 
 def is_it_bad(string):
+	""" Receives data (str) that will be used in sql queries to protect 
+	from SQL injection and other errors. Returns True or False"""
 	if string is None:
 		return True
 	not_safe = "; \\ ' '' %"
@@ -79,6 +104,8 @@ def is_it_bad(string):
 	return False
 
 def it_isnt_id(may_be_id):
+	""" Receives id number (int) that will be used in sql queries to protect 
+	from SQL injection and other errors. Returns True or False"""
 	if may_be_id is None:
 		return True
 	if not str(may_be_id).isdigit():
@@ -91,6 +118,8 @@ def it_isnt_id(may_be_id):
 # GENERIC SQL QUERIES
 # GENERIC SQL QUERIES
 def get_all_table(table):
+	""" Receives name of table (str) and returns result of SQL 
+	query (list)"""
 	try:
 		table_names = ["admin", "benefit", "benefitdata", "company", "companybenefit",
 						"datatype", "person", "personbenefit", "persondata"]
@@ -103,6 +132,8 @@ def get_all_table(table):
 
 
 def get_one_from(table, where, data):
+	""" Receives name of table (str), condition (str) and data (str) and returns 
+	result of fetchone() SQL query (list)"""
 	try:
 		table_names = ["admin", "benefit", "benefitdata", "company", "companybenefit",
 						"datatype", "person", "personbenefit", "persondata"]
@@ -118,6 +149,8 @@ def get_one_from(table, where, data):
 
 
 def get_all_from(table, where, data):
+	""" Receives name of table (str), condition (str) and data (str) and returns 
+	result of fetchall() SQL query (list)"""
 	try:
 		if (is_it_bad(table) or is_it_bad(where)) or is_it_bad(data):
 			return None
@@ -133,6 +166,8 @@ def get_all_from(table, where, data):
 
 
 def search_like(table, like):
+	""" Receives name of table (str) and word-like (str) and returns result of 
+	fetchall() SQL query (list)"""
 	try:
 		table_names = ["admin", "benefit", "benefitdata", "company", "companybenefit",
 						"datatype", "person", "personbenefit", "persondata"]
@@ -153,6 +188,9 @@ def search_like(table, like):
 # REGISTER QUERIES
 # REGISTER QUERIES
 def register_person(name, cpf, benefits):
+	""" Receives name of name of person (str), cpf number (str) and list of benefits and 
+	registers said person (insert in sql person table). Calls register_person_benefits 
+	in case of any in the list. Returns person id (int)"""
 	try:
 		if (is_it_bad(name) or is_it_bad(cpf)):
 			return None
@@ -174,6 +212,9 @@ def register_person(name, cpf, benefits):
 
 
 def register_person_benefits(benefits, idPerson):
+	""" Receives list of benefits and person's id (int) and registers said person 
+	(insert in sql perosonBenefit table) in every benefit on the list, if any. 
+	Returns True"""
 	try:
 		if not benefits or it_isnt_id(idPerson):
 			return None
@@ -189,6 +230,10 @@ def register_person_benefits(benefits, idPerson):
 
 # Confirma se dado já está cadastrado antes // dados vindos do formulário são type(str)
 def register_person_data(idPerson, ids_datatype, data_values):
+	""" Receives person's id (int), list of datatypes (types of data) and a list of 
+	data values. Those values are necessary for enrollment in benefit plans. The list 
+	is generated by the benefit's requirement for enrollment. Items in ids_datatype 
+	are (str), therefore should be typecasted to (int) for comparisons. Returns True. """
 	try:
 		if it_isnt_id(idPerson) or (not ids_datatype or not data_values):
 			return None
@@ -218,6 +263,10 @@ def register_person_data(idPerson, ids_datatype, data_values):
 
 
 def register_benefit(name):
+	"""Receives name of new benefit (str) for registration (insert in sql benefit table). 
+	It also registers the benefit with the current company which user is signed in at 
+	the moment. It uses session['idCompany'] to get the company's id. Returns the new
+	benefit's id (int)"""
 	try:
 		if name is None:
 			return None
@@ -241,6 +290,9 @@ def register_benefit(name):
 
 
 def register_datatype(name, example, idBenefit):
+	"""Receives name of new type of data (str), example of type of data (str) and benefit's id,
+	for registration (insert in sql datatype table). It also registers the type of data with 
+	the benefit. Returns True."""
 	try:
 		if (not name or not example) or not idBenefit:
 			return None
@@ -269,6 +321,8 @@ def register_datatype(name, example, idBenefit):
 # DELETE QUERIES
 # DELETE QUERIES
 def delete_person(idPerson):
+	"""Receive's person's id (int) and deletes it from the database along all other
+	data vinculated to that id. Returns nothing (void)"""
 	try:
 		if it_isnt_id(idPerson):
 			return None
@@ -287,6 +341,8 @@ def delete_person(idPerson):
 
 
 def delete_benefit(idBenefit):
+	"""Receive's benefit's id (int) and deletes it from the database along all other
+	data vinculated to that id. Returns nothing (void)"""
 	try:
 		if it_isnt_id(idPerson):
 			return None
@@ -311,6 +367,10 @@ def delete_benefit(idBenefit):
 # UPDATE QUERIES
 # UPDATE QUERIES
 def update_benefit_data(idBenefit, ids_datatype):
+	""" Receives a benefit's id (int) and a list of ids (int) of types of data (datatypes). 
+	This function is called when benefits want to change the type of data they require
+	for enrollment, this should be reflected in the database. This function first checks
+	if any changes are necessary. Returns true."""
 	try:
 		if it_isnt_id(idBenefit):
 			return None
@@ -339,6 +399,12 @@ def update_benefit_data(idBenefit, ids_datatype):
 
 # Form data is type(str).
 def update_person_benefits(idPerson, ids_benefit):
+	""" Receives a person's id (int) and a list of ids of benefits (ids). 
+	This function is called when a person is enrolling in new benefits or 
+	unenrolling in current ones. This function first checksif any changes are 
+	necessary. Returns true if a new plan was added so we can later get the
+	new data necessary for enrollment. Returns false in case there's no new
+	benefit enrollment."""
 	try:
 		if it_isnt_id(idPerson):
 			return None
@@ -381,6 +447,11 @@ def update_person_benefits(idPerson, ids_benefit):
 # SEARCH QUERIES
 # SEARCH QUERIES
 def search_people(idCompany, like):
+	""" Receives company's id (int) and name-like (str) to search for a person 
+	with that name in a specific company. In the current system, as described in 
+	the README, the company will always be the one recorded in session['company'], 
+	but the function can get any other company in the database. Returns list of
+	people."""
 	try:
 		if is_it_bad(like) or it_isnt_id(idCompany):
 			return None
@@ -395,6 +466,11 @@ def search_people(idCompany, like):
 
 
 def search_benefits(idCompany, like):
+	""" Receives benefits's id (int) and name-like (str) to search for a benefit 
+	with that name vinculated a specific company. In the current system, as described in 
+	the README, the company will always be the one recorded in session['company'], 
+	but the function can get benefits for any other company in the database.
+	Returns list of benefits."""
 	try:
 		if it_isnt_id(idCompany) or is_it_bad(like):
 			return None
@@ -414,6 +490,9 @@ def search_benefits(idCompany, like):
 # GET QUERIES
 # GET QUERIES
 def get_person_data(profile, datalist):
+	"""Receives person's profile (dict) and a list of ids of types of data to get
+	each data in the list. Returns a list of dictionaries with the id, name and data 
+	value"""
 	try:
 		all_data = []
 		if not datalist or not profile:
@@ -436,6 +515,9 @@ def get_person_data(profile, datalist):
 
 
 def get_all_person_data(idPerson):
+	""" Receives a person's id (int) and returns a list of all data found on personData 
+	table with name, id and data. It's similar to get_person_data() but this one doesn't
+	require a list of datatypes. Returns a list with the data."""
 	try:
 		if it_isnt_id(idPerson):
 			return None
@@ -448,6 +530,9 @@ def get_all_person_data(idPerson):
 		raise Exception("Undefined SQL query error")
 
 def get_data_example(idDatatype):
+	""" Receives a type of data's id (int) and returns the value o that type of data
+	(str or int). This function shouldn't exist, but someone (read me) only thought 
+	about adding examples to the datatypes later on. Therefore this is a quick fix. :)"""
 	try:
 		if it_isnt_id(idDatatype):
 			return None
@@ -461,6 +546,8 @@ def get_data_example(idDatatype):
 
 
 def get_data(idPerson, idDatatype):
+	""" Receives a person's id (int) and an id for a type of data and returns that data
+	(int or str) """
 	try:
 		if it_isnt_id(idPerson) or it_isnt_id(idDatatype):
 			return None
@@ -476,6 +563,8 @@ def get_data(idPerson, idDatatype):
 
 
 def get_person_benefits(idPerson):
+	""" Recebices a person's id and returns a list of all benefits vinculated to 
+	that person """
 	try:
 		if it_isnt_id(idPerson):
 			return None
@@ -489,6 +578,8 @@ def get_person_benefits(idPerson):
 
 
 def get_profile(idPerson):
+	""" Receives a person's id (int) and returns their profile (dict) with all
+	their information.""" 
 	try:
 		if it_isnt_id(idPerson):
 			return None
@@ -515,6 +606,8 @@ def get_profile(idPerson):
 
 
 def get_company_benefits(idCompany):
+	""" Receives a company's id (int) and returns a list of all benefits 
+	vinculated to that company """
 	try:
 		if it_isnt_id(idCompany):
 			return None
@@ -529,6 +622,9 @@ def get_company_benefits(idCompany):
 
 
 def get_benefits_data(benefits):
+	""" Receives a list of benefits and returns a list of all types of data 
+	vinculated to those benefits. It is called when a person is registering 
+	for a new benefit."""
 	try:
 		all_data = []
 		if benefits is None:
@@ -547,6 +643,8 @@ def get_benefits_data(benefits):
 
 
 def get_benefit_profile(idBenefit):
+	""" Receives a benefit's id (int) and returns it's profile (dict) with all
+	their information."""
 	try:
 		if it_isnt_id(idBenefit):
 			return None
@@ -576,6 +674,9 @@ def get_benefit_profile(idBenefit):
 
 
 def get_admission_date(idPerson, idBenefit):
+	""" Receives a person's id (int) and a benefit's id (int) and returns the date (str) of
+	when the person enrolled in that benefit. Look how beautifully implemented 
+	was the formatting of the date :)"""
 	try:
 		if it_isnt_id(idPerson) or it_isnt_id(idBenefit):
 			return None
@@ -596,6 +697,7 @@ def get_admission_date(idPerson, idBenefit):
 @app.route("/", methods=['GET'])
 @login_required
 def index():
+	""" Returns index.html with header information """
 	return render_template("index.html", header = get_header(session))
 
 
@@ -603,6 +705,8 @@ def index():
 @app.route("/<who>", methods=['GET'])
 @login_required
 def home(who):
+	""" Returns home.html with header and who in case of pesssoas e beneficios.
+	This was done so I didn't have to create a html file for each page. Thank you Jinja2!"""
 	if who not in ['pessoas', 'beneficios']:
 		whoops = "Página Inexistente"
 		return render_template("index.html", header = get_header(session), whoops = whoops)
@@ -613,6 +717,7 @@ def home(who):
 @app.route("/<who>/lista", methods=['GET'])
 @login_required
 def list(who):
+	""" Returns a list of all people or benefits, depending on who 'who' is. """
 	if who == "beneficios":
 		who_list = get_company_benefits(session["idCompany"])
 	elif who == "pessoas":
@@ -628,6 +733,8 @@ def list(who):
 @app.route("/<who>/busca", methods=['GET', 'POST'])
 @login_required
 def search(who):
+	""" If 'GET' returns the search page, if 'POST' returns the result of that search for 
+	both People and Benefits """
 	if request.method == "POST":
 		name = request.form.get("name")
 		if not name:
@@ -652,6 +759,12 @@ def search(who):
 @app.route("/<who>/cadastro", methods=['GET', 'POST'])
 @login_required
 def registration(who):
+	""" This is a complicated one but in summary it is the registration function/router for both
+	benefits and people. I suggest first reading the bottom part of the function with the 'else' 
+	bellow if request.. That is the 'GET', what is loaded before any form is submitted. On the
+	person registration part, in POST, it receives the information and checks it before calling
+	all other functions necessary for a complete registration. Once that it occurs successfully,
+	it returns the form for additional data to be inputed."""
 	if request.method == "POST":
 		name = request.form.get("name")
 		if who == "beneficios":
@@ -717,6 +830,8 @@ def registration(who):
 @app.route("/pessoas/cadastro/beneficio", methods=['POST'])
 @login_required
 def regiterpersondata():
+	""" This function simply registers the aditional data for person
+	submitted by calling register_person_data() and returns the persons profile """
 	idPerson = request.form.get("idPerson")
 	ids_datatype = request.form.getlist("idDatatype")
 	data_values = request.form.getlist("data_value")
@@ -731,6 +846,8 @@ def regiterpersondata():
 @app.route("/beneficios/cadastro/dado/<idWho>", methods=['GET','POST'])
 @login_required
 def registernewdatatype(idWho):
+	""" This function registers new types of data and returns the benefits 
+	profile aka idWho"""
 	if it_isnt_id(idWho):
 		return redirect("/")
 	if request.method == "POST":
@@ -764,6 +881,7 @@ def registernewdatatype(idWho):
 @app.route("/<who>/perfil/<idWho>", methods=['GET'])
 @login_required
 def profile(who, idWho):
+	""" Receives id (idWho) and who (Person or Benefit) and loads it's profile page"""
 	if it_isnt_id(idWho):
 		return redirect("/")
 	if who == "pessoas":
@@ -787,6 +905,9 @@ def profile(who, idWho):
 @app.route("/beneficios/<idBenefit>/pessoas/<idPerson>", methods=['GET'])
 @login_required
 def benefitformprofile(idBenefit, idPerson):
+	""" Receives idBenefit and idPerson to show the persons registration form
+	(ficha de cadastro) with the information necessary to send over to the 
+	benefit provider """
 	if not idBenefit.isdigit() or not idPerson.isdigit():
 		whoops = "Perfil ou página não encontrado"
 		return render_template("index.html", header = get_header(session),
@@ -811,6 +932,10 @@ def benefitformprofile(idBenefit, idPerson):
 @app.route("/<who>/editar/<idWho>", methods=['GET', 'POST'])
 @login_required
 def editprofile(who, idWho):
+	""" This is another complicated one, and in another time, could be refactored 
+	into smaller functions. It receives who (benefit or person) and idWho (it's id),
+	then it proceeds in checking the values before calling other functions to
+	update its profile """
 	if it_isnt_id(idWho):
 		return redirect("/")
 	if request.method == "POST":
@@ -871,6 +996,8 @@ def editprofile(who, idWho):
 @app.route("/<who>/deletar", methods=['POST'])
 @login_required
 def deleteprofile(who):
+	""" Receives who (pessoas or beneficios) and call a function to delete it's profile
+	and data from the database. That's why it's at the end of the code. """
 	if request.method == "POST":
 		if who == "pessoas":
 			idPerson = request.form.get("idPerson")
@@ -892,6 +1019,11 @@ def deleteprofile(who):
 # Login autorizado somente para administradores cadastrados
 @app.route("/login", methods=["GET", "POST"])
 def login():
+	""" The beginning at the end. Who knew! This function receives the user's
+	cpf and checks it's values before allowing them to login. There's no 
+	security measure implemented whatsoever. If the cpf matches one of the 
+	admins, it proceeds to load all information necessary on the session (dict)
+	for further use regarding the user and their company."""
 	session.clear()
 	if request.method == "POST":
 		cpf = request.form.get("cpf")
@@ -927,9 +1059,10 @@ def login():
 
 @app.route("/logout")
 def logout():
-    session.clear()
-    return redirect("/")
+	session.clear()
+	return redirect("/")
 
 if __name__ == '__main__':
+	""" Hello World! """
 	app.secret_key='secret123'
 	app.run()

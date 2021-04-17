@@ -62,11 +62,11 @@ This way you'll have a pre-populated database with information for three users a
 
 To log in as:
 
-Wonka Industries use CPF 230.841.911-31.
+:: Wonka Industries use CPF 230.841.911-31.
 
-Tio Patinhas Bank use CPF 985.105.727-47
+:: Tio Patinhas Bank use CPF 985.105.727-47
 
-Acme Co use CPF 985.105.727-47
+:: Acme Co use CPF 985.105.727-47
 
 I recommend using [Gerador de CPF](https://www.geradorcpf.com/) to generate new CPFs if you want to create new users. This is needed because of the CPF checker/validator. 
 
@@ -85,6 +85,7 @@ I recommend using [Gerador de CPF](https://www.geradorcpf.com/) to generate new 
   
   - Refactor, refactor and refactor. Some functions and SQL queries can be split into two, others combined. As I've heard before but related to art: "You never finish an art piece, you give up on it." 
   - Unit testing. Even though I did my best to test the functions, I feel like I needed to do more unit tests to make sure it won't crash. 
+  - Implement some form of authentication and/or security measures. 
 
 
 
