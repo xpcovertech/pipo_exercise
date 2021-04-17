@@ -61,8 +61,11 @@ bash setup
 This way you'll have a pre-populated database with information for three users and employees from three fictitious companies.
 
 To log in as:
+
 Wonka Industries use CPF 230.841.911-31.
+
 Tio Patinhas Bank use CPF 985.105.727-47
+
 Acme Co use CPF 985.105.727-47
 
 I recommend using [Gerador de CPF](https://www.geradorcpf.com/) to generate new CPFs if you want to create new users. This is needed because of the CPF checker/validator. 
