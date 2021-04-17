@@ -26,6 +26,8 @@ Type of data is the type of information that a benefit plan requires from a pers
 
 Here is how it works and some of my software design choices told as a story. 
 
+![Homepage after login](/documents/index.png)
+
 HR person from "Wonka Industries" can log in with their CPF number and choose either **People** or **Benefits** on the menu. Both will lead to the "same destination", but from very different perspectives. On the **People** link, they can choose to register, search or see a list of all registered employees. At registering they only need to input the employee's name and their CPF (Brazilian "ID" number). On the same page, they can choose to sign up to a benefit plan by selecting from a list of registered benefits. They can also choose to register the employee without selecting any benefits. Flexibility is key here. 
 
 If they selected one or more benefits, they will be taken to another page where the combined data necessary for enrollment is shown. The goal here is to avoid duplicates and unnecessary work. One form for all the benefits selected. Once that information is filled out and sent, everything is done. 
