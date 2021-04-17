@@ -87,7 +87,7 @@ To log in as:
 
 :: Acme Co use CPF 985.105.727-47
 
-I recommend using [Gerador de CPF](https://www.geradorcpf.com/) to generate new CPFs if you want to create new users. This is needed because of the CPF checker/validator. 
+I recommend using [Gerador de CPF](https://www.geradorcpf.com/) to generate new CPFs if you want to register new employees. This is needed because of the CPF checker/validator. 
 
 
 ## Technologies
