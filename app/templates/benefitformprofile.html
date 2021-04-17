@@ -34,7 +34,7 @@
 		{% if count|length < benefit["data"]|length %}
 			<input hidden name="idBenefit" value="{{ benefit['id'] }}" type="text">
 			<input hidden name="force_update" value="{{ benefit['id'] }}" type="text">
-			<h6 style="color: red;">ATENÇÃO: Este plano atualizou sua lista de dados necessários. Clique <button class="btn btn-primary btn-sm" type="submit">aqui</button> para atualizar os dados do cadastro.</h6>
+			<h6 style="color: red;">ATENÇÃO: Este plano atualizou a lista de dados necessários. Clique <button class="btn btn-primary btn-sm" type="submit">aqui</button> para atualizar os dados do cadastro.</h6>
 		{% endif %}
 		</form>
 	{% endif %}
