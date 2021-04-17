@@ -38,6 +38,8 @@ Once the HR person (I'll call them user, from here on) selects an employee eithe
 
 If the user wishes to enroll the employee in a new benefit (or more), they can do so by clicking on a checkbox. Once submitted the user is taken to another page where they can add any new data (if required by the new benefit plan) or update anything that might need to be updated. Only data needed for enrollment in the new plan (or new plans) is shown on the screen. 
 
+![Enrollment of existing employee in a new benefit](/documents/registering_benefit.png)
+
 Data such as Name and CPF cannot be changed. The same goes for Date of Enrollment, which is generated automatically as a timestamp once the user is registered to a new benefit. Some data should be easy to be changed, others shouldn't. The other data necessary for enrollment, if in the database, is preloaded on each respective field. The idea here is to avoid typing and human errors. 
 
 On the same page, and at the same time, the selection of a new benefit happens the user can unenroll an employee from a benefit plan. If they do so, the information stays on the database. The data is "attached" to the employee and not the benefit plan. The benefit can simply "see" that information when it requests it at enrollment. 
@@ -46,7 +48,9 @@ The data stays there for as long as the employee is with the company. The data i
 
 On the **Benefits** link, the user can register a new benefit, search or see a list of all registered benefits offered by their employer. The same way an HR person using the platform can only see their company employees, they can only see their own benefit plans. 
 
-On the benefit plan profile page, they can see and edit a list of the required data for enrollment and a list of current employees enrolled in that benefit plan. Once the employee's name is clicked, the employee's registration form profile (ficha de cadastro) is shown on the screen. On this page, which can be also accessed from the employee's profile, is where **employee data** and **benefit plan** meet. Not so much in the database. A pdf of the database schema (in Portuguese, sorry) is in the documentation folder if you want to take a look at it. 
+On the benefit plan profile page, they can see and edit a list of the required data for enrollment and a list of current employees enrolled in that benefit plan. Once the employee's name is clicked, the employee's "registration form profile" (ficha de cadastro) is shown on the screen. On this page, which can be also accessed from the employee's profile, is where **employee data** and **benefit plan** meet. Not so much in the database. A pdf of the database schema (in Portuguese, sorry) is in the documentation folder if you want to take a look at it. 
+
+![Employee's registration form with a notification that the benefit requires new data](/documents/benefit_registration_form_with_notification.png)
 
 Now, let's say a benefit plan now asks for the employee's zodiac sign. All the user has to do is go on the profile of the (exoteric) benefit plan, click on edit types of data and see if that type is already registered on the platform. I said on the platform because all types of data are shared across all plans and companies on the platform. This way the user doens't have to type Date of Birth every single time he is registering a new benefit that requires that information. This way it's also easier to keep the database more organized and avoids duplicates. Duplicates are evil and eat resources. 
 
@@ -57,7 +61,8 @@ Back to the story, if no benefit plan has ever asked for the employee’s zodiac
 I believe the in order to solve complex problems you need a combination of design, communication, and technology. It is necessary to understand why people behave the way they do, and apply technology to it to either enforce that behavior or redirect it. For example, the simple act of having an example written on the screen before the human has to fill out a form field does this at a very low cost. 
 
 I really enjoyed developing this solution and thinking through its challenges. I'm grateful for the opportunity. 
- 
+
+PS: There are more screenshots available in the Documents folder. 
 
 ## Running it
 
