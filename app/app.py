@@ -13,17 +13,16 @@ This is a webapp that manages employees' benefits.
 For more visit https://github.com/leorapini/pipo_exercise
 Code written by Leo Rapini
 
-Names:
-Person is every person registered in the database. 
-Benefit is the name of any "benefício". Ex. Plano Dental Sorriso.
-Company is an employer of of persons that have benefists registered to them,
-allowing person to be enrolled in those benefits. 
-
-Type of Data is the kind of data benefits require for someone to be enrolled.
-Data is any value vinculated to a type of data. Ex. Type of Data: Nome or Peso.
+*Glossary:
+Glossary: A person is every employee registered in the database. 
+The benefit is the name of any type of benefit plan. Ex. Health Insurance. 
+The company is an employer of people that have benefits registered to them, 
+allowing people to be enrolled in those benefits. Type of data is the type 
+of information that a benefit plan requires from a person at enrollment. 
+Ex. Date of Birth
 
 Please check the SQL schema in the folder Documentation before reading the code. 
-It will be a more pleasant experience, I promise. 
+It will make it a more pleasant experience, I promise. 
 '''
 
 app = Flask(__name__)
@@ -228,7 +227,6 @@ def register_person_benefits(benefits, idPerson):
 		raise Exception("Undefined SQL query error. Data may not been registered.")
 
 
-# Confirma se dado já está cadastrado antes // dados vindos do formulário são type(str)
 def register_person_data(idPerson, ids_datatype, data_values):
 	""" Receives person's id (int), list of datatypes (types of data) and a list of 
 	data values. Those values are necessary for enrollment in benefit plans. The list 
@@ -321,8 +319,8 @@ def register_datatype(name, example, idBenefit):
 # DELETE QUERIES
 # DELETE QUERIES
 def delete_person(idPerson):
-	"""Receive's person's id (int) and deletes it from the database along all other
-	data vinculated to that id. Returns nothing (void)"""
+	"""Receives person's id (int) and deletes it from the database along all other
+	data linked to that id. Returns nothing (void)"""
 	try:
 		if it_isnt_id(idPerson):
 			return None
@@ -341,8 +339,8 @@ def delete_person(idPerson):
 
 
 def delete_benefit(idBenefit):
-	"""Receive's benefit's id (int) and deletes it from the database along all other
-	data vinculated to that id. Returns nothing (void)"""
+	"""Receives benefit's id (int) and deletes it from the database along all other
+	data linked to that id. Returns nothing (void)"""
 	try:
 		if it_isnt_id(idPerson):
 			return None
@@ -401,7 +399,7 @@ def update_benefit_data(idBenefit, ids_datatype):
 def update_person_benefits(idPerson, ids_benefit):
 	""" Receives a person's id (int) and a list of ids of benefits (ids). 
 	This function is called when a person is enrolling in new benefits or 
-	unenrolling in current ones. This function first checksif any changes are 
+	unenrolling in current ones. This function first checks if any changes are 
 	necessary. Returns true if a new plan was added so we can later get the
 	new data necessary for enrollment. Returns false in case there's no new
 	benefit enrollment."""
@@ -466,8 +464,8 @@ def search_people(idCompany, like):
 
 
 def search_benefits(idCompany, like):
-	""" Receives benefits's id (int) and name-like (str) to search for a benefit 
-	with that name vinculated a specific company. In the current system, as described in 
+	""" Receives benefit's id (int) and name-like (str) to search for a benefit 
+	with that name linked a specific company. In the current system, as described in 
 	the README, the company will always be the one recorded in session['company'], 
 	but the function can get benefits for any other company in the database.
 	Returns list of benefits."""
@@ -563,7 +561,7 @@ def get_data(idPerson, idDatatype):
 
 
 def get_person_benefits(idPerson):
-	""" Recebices a person's id and returns a list of all benefits vinculated to 
+	""" Receives a person's id and returns a list of all benefits linked to 
 	that person """
 	try:
 		if it_isnt_id(idPerson):
@@ -607,7 +605,7 @@ def get_profile(idPerson):
 
 def get_company_benefits(idCompany):
 	""" Receives a company's id (int) and returns a list of all benefits 
-	vinculated to that company """
+	linked to that company """
 	try:
 		if it_isnt_id(idCompany):
 			return None
@@ -623,7 +621,7 @@ def get_company_benefits(idCompany):
 
 def get_benefits_data(benefits):
 	""" Receives a list of benefits and returns a list of all types of data 
-	vinculated to those benefits. It is called when a person is registering 
+	linked to those benefits. It is called when a person is registering 
 	for a new benefit."""
 	try:
 		all_data = []
@@ -830,7 +828,7 @@ def registration(who):
 @app.route("/pessoas/cadastro/beneficio", methods=['POST'])
 @login_required
 def regiterpersondata():
-	""" This function simply registers the aditional data for person
+	""" This function simply registers the additional data for person
 	submitted by calling register_person_data() and returns the persons profile """
 	idPerson = request.form.get("idPerson")
 	ids_datatype = request.form.getlist("idDatatype")
@@ -1016,7 +1014,6 @@ def deleteprofile(who):
 
 
 # LOGIN
-# Login autorizado somente para administradores cadastrados
 @app.route("/login", methods=["GET", "POST"])
 def login():
 	""" The beginning at the end. Who knew! This function receives the user's
