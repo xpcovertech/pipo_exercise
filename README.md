@@ -2,7 +2,7 @@
 
 [Pipo](https://www.piposaude.com.br/) is a Brazilian Startup in the healthcare industry with the bold goal of revolutionizing people's experience with health services. As part of their hiring process, they ask potential software engineers to develop a solution to two of their main challenges: procurement process flow and data management. The goal of the solution I've developed is to address those two challenges through a simplified workflow for their clients' HR person and a lean data structure for Pipo. The code is the bridge between those two things.
 
-This system would be used by HR people at corporations in charge of managing employee's benefits. Each provider requires different information at enrollment and employees might switch benefits at different times. In short, everything can change at any time. From the type of data (information) the provider requires, to the employee's data in the database.
+This system would be used by HR people in charge of managing employee's benefits. Each provider requires different information at enrollment and employees might switch benefits at different times. In short, everything can change at any time. From the type of data (information) the provider requires, to the employee's data in the database.
 
 DISCLAIMER: Pipo did not ask me to develop a solution as complete as this. They are very open and accomodating as to what part of the solution you'd like to develop and how long do you'd need to do it. In hindsight, I know I could have focused more on input checking for example, but I chose to take a "bird's eye view" approach. It was my own choice to develop this. 
 
@@ -19,9 +19,9 @@ I've decided to use Python because of my familiarity with the language and speed
 *For this solution I've only focused on people and benefits management. In a real-world situation, there should also be profiles for companies and providers. For simplicity's sake, I've decided to forgo those two. Therefore, there's no "admin" management and no way to register new companies through the platform. That can be done only thru the bash script in the setup folder. See below for more information.*
 
 *Glossary:
-A person is every employee registered in the database. 
-The benefit is the name of any type of benefit plan. Ex. Health Insurance.
-The company is an employer of people that have benefits registered to them, allowing people to be enrolled in those benefits.
+Person is every employee registered in the database. 
+Benefit is the name of any type of benefit plan. Ex. Health Insurance.
+Company is an employer of people that have benefits registered to them, allowing people to be enrolled in those benefits.
 Type of data is the type of information that a benefit plan requires from a person at enrollment. Ex. Date of Birth*
 
 Here is how it works and some of my software design choices told as a story. 
