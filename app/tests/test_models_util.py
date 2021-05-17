@@ -1,7 +1,7 @@
 import unittest
 from subprocess import call
 
-from models import *
+from models_util import *
 
 class TestCompanyExists(unittest.TestCase):
 
