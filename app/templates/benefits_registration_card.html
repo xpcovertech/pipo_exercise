@@ -5,25 +5,28 @@
     <hr style="margin-top: 40px; margin-bottom: 50px;">
 	<h1>{{ benefit["name"] }}</h1>
 	<h4 style="margin-bottom: 30px;">Ficha de Cadastro de {{ person["name"] }}</h4>
-	{% if benefit["data"]|length %}
+	{% if benefit["data_types"]|length %}
+		{% if person_data|length == 0 %}
+			<p><i>Este usuário não possui nenhum dado cadastrado. Por favor clique no botão abaixo e atualize seu cadastro.</i></p><br>
+		{% endif %}
 		{% set count = [ ] %}
 		<form action="/pessoas/editar/{{ person['id'] }}" method="post">
-		{% for benefit in benefit["data"] %}
-			{% for person in person["data"] %}
-				{% if benefit['id'] == person['idDatatype'] %}
+		{% for data_type in benefit["data_types"] %}
+			{% for data in person_data %}
+				{% if data_type['idDatatype'] == data['idDatatype'] and data['data'] != none %}
 					{% set __ = count.append(1) %}
-					{% if benefit['id'] == 3 %}
+					{% if data_type['name'] == "Data Admissão" %}
 						<div class="form-group row">
-			        		<label for="id" class="col-sm-2 col-form-label">{{ benefit['name'] }}</label>
+			        		<label for="id" class="col-sm-2 col-form-label">{{ data_type['name'] }}</label>
 			        		<div class="col-sm-10">
 			            	<input readonly class="form-control" name="id" value="{{ admission_date }}" type="text">
 			            	</div>
 			        	</div>
 					{% else %}
 			   			<div class="form-group row">
-			        		<label for="id" class="col-sm-2 col-form-label">{{ benefit['name'] }}</label>
+			        		<label for="id" class="col-sm-2 col-form-label">{{ data_type['name'] }}</label>
 			        		<div class="col-sm-10">
-			            	<input readonly class="form-control" name="id" value="{{ person['data'] }}" type="text">
+			            	<input readonly class="form-control" name="id" value="{{ data['data'] }}" type="text">
 			            	</div>
 			        	</div>
 			        {% endif %}
@@ -31,12 +34,14 @@
 				{% endif %}
 			{% endfor %}
 		{% endfor %}
-		{% if count|length < benefit["data"]|length %}
+		{% if count|length < benefit["data_types"]|length %}
 			<input hidden name="idBenefit" value="{{ benefit['id'] }}" type="text">
 			<input hidden name="force_update" value="{{ benefit['id'] }}" type="text">
 			<h6 style="color: red;">ATENÇÃO: Este plano atualizou a lista de dados necessários. Clique <button class="btn btn-primary btn-sm" type="submit">aqui</button> para atualizar os dados do cadastro.</h6>
 		{% endif %}
 		</form>
+	{% else %}
+		<p>Este plano não possui nenhum tipo de dado cadastrado.</p>
 	{% endif %}
 	
 	<hr style="margin-top: 40px;">

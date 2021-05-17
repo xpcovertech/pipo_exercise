@@ -1,9 +1,7 @@
 import sqlite3
 import csv
-import time
 
 def populate_company(db):
-	print("Populating company... time.sleep(2)")
 	with open("data/company.csv", "r") as data:
 		reader = csv.DictReader(data)
 		for row in reader:
@@ -12,11 +10,8 @@ def populate_company(db):
 						(name) 
 						VALUES (:name)""",
 						{"name": name})
-			time.sleep(1) # sleep para que o timestamp seja diferente
-	print("Company populated!")
 
 def populate_person(db):
-	print("Populating person... time.sleep(1)")
 	with open("data/person.csv", "r") as data:
 		reader = csv.DictReader(data)
 		for row in reader:
@@ -27,11 +22,8 @@ def populate_person(db):
 						(idCompany, name, cpf) 
 						VALUES (:idCompany, :name, :cpf)""",
 						{"idCompany": idCompany, "name": name, "cpf": cpf})
-			time.sleep(1)
-	print("Person populated!")
 
 def populate_admin(db):
-	print("Populating admin...")
 	with open("data/admin.csv", "r") as data:
 		reader = csv.DictReader(data)
 		for row in reader:
@@ -43,10 +35,8 @@ def populate_admin(db):
 						VALUES (:idCompany, :idPerson, :level)""",
 						{"idCompany": idCompany, "idPerson": idPerson,
 						"level": level})
-	print("Admin populated!")
 
 def populate_benefit(db):
-	print("Populating benefit...")
 	with open("data/benefit.csv", "r") as data:
 		reader = csv.DictReader(data)
 		for row in reader:
@@ -55,10 +45,8 @@ def populate_benefit(db):
 						(name) 
 						VALUES (:name)""",
 						{"name": name})
-	print("Benefit populated!")
 
 def populate_datatype(db):
-	print("Populating datatype...")
 	with open("data/datatype.csv", "r") as data:
 		reader = csv.DictReader(data)
 		for row in reader:
@@ -68,10 +56,8 @@ def populate_datatype(db):
 						(name, example) 
 						VALUES (:name, :example)""",
 						{"name": name, "example": example})
-	print("Datatype populated!")
 
 def populate_company_benefit(db):
-	print("Populating company_benefit...")
 	with open("data/company_benefit.csv", "r") as data:
 		reader = csv.DictReader(data)
 		for row in reader:
@@ -81,10 +67,8 @@ def populate_company_benefit(db):
 						(idCompany, idBenefit) 
 						VALUES (:idCompany, :idBenefit)""",
 						{"idBenefit": idBenefit, "idCompany": idCompany})
-	print("Company_benefit populated!")
 
 def populate_benefit_datatype(db):
-	print("Populating benefit datatype...")
 	with open("data/benefit_datatype.csv", "r") as data:
 		reader = csv.DictReader(data)
 		for row in reader:
@@ -94,7 +78,30 @@ def populate_benefit_datatype(db):
 						(idBenefit, idDatatype) 
 						VALUES (:idBenefit, :idDatatype)""",
 						{"idBenefit": idBenefit, "idDatatype": idDatatype})
-	print("Benefit datatype populated!")
+
+def populate_person_benefit(db):
+	with open("data/person_benefit.csv", "r") as data:
+		reader = csv.DictReader(data)
+		for row in reader:
+			idPerson = row["idPerson"]
+			idBenefit = row["idBenefit"]
+			db.execute("""INSERT INTO personBenefit
+						(idPerson, idBenefit) 
+						VALUES (:idPerson, :idBenefit)""",
+						{"idPerson": idPerson, "idBenefit": idBenefit})
+
+def populate_person_data(db):
+	with open("data/person_data.csv", "r") as data:
+		reader = csv.DictReader(data)
+		for row in reader:
+			idPerson = row["idPerson"]
+			idDatatype = row["idDatatype"]
+			data = row["data"]
+			db.execute("""INSERT INTO personData
+						(idPerson, idDatatype, data) 
+						VALUES (:idPerson, :idDatatype, :data)""",
+						{"idPerson": idPerson, "idDatatype": idDatatype,
+						"data": data})
 
 if __name__ == '__main__':
 	con = sqlite3.connect(r"../db/pipo.db")
@@ -106,5 +113,7 @@ if __name__ == '__main__':
 	populate_datatype(cur)
 	populate_company_benefit(cur)
 	populate_benefit_datatype(cur)
+	populate_person_benefit(cur)
+	populate_person_data(cur)
 	con.commit()
 	con.close()

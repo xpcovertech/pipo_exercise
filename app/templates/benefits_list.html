@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/beneficios/cadastro">Cadastrar</a> beneficios, <a href="/beneficios/busca">buscar</a> ou ver uma <a href="/beneficios/lista">lista</a>?</p>
+	<br>
+		<h1>Benefícios Disponíveis</h1>
+		{% if benefits_list|length %}
+		<p style="margin-bottom: 7px; margin-top: -7px;" class="text-muted">Clique no nome para ver o perfil.</p>
+		{% for benefit in benefits_list|sort(attribute='name') %}
+			<a href="/beneficios/perfil/{{ benefit['idBenefit'] }}">{{ benefit["name"] }}</a><br>
+		{% endfor %}
+	{% else %}
+		<p>Nenhum resultado encontrado :(</p>
+	{% endif %}
+	<br><br>
+{% endblock %}

@@ -5,18 +5,16 @@
     <br>
 	<h1 style="margin-bottom: 30px">Dados para Cadastro nos Benefícios Selecionados</h1>
 	<form action="/pessoas/cadastro/beneficio" method="post">
-        {% if person_data|length %}
-            {% for data in person_data|sort(attribute='id') %}
+        {% if combined_data|length %}
+            {% for data in combined_data|sort(attribute='idDatatype') %}
                 <div class="form-group row">
-                    <label for="{{ data['idDatatype'] }}" class="col-sm-2 col-form-label">{{ data["name"] }}</label><br>
+                    <label for="{{ data['idDatatype'] }}" class="col-sm-2 col-form-label">{{   data["name"] }}</label><br>
                     <div class="col-sm-10">
                         <input hidden id="{{ data['idDatatype'] }}" name="idDatatype" value="{{ data['idDatatype'] }}">
-                    {% if data["idDatatype"] == 3 %}
-                        <input readonly class="form-control" id="{{ data['idDatatype'] }}" name="data_value" value="{{ data['example'] }}" type="text">
+                    {% if data["name"] in ["CPF", "Nome", "Data Admissão"] %}
+                        <input readonly class="form-control" id="{{ data['idDatatype'] }}" name="data_value" value="{{ data['data'] }}" type="text">
                     {% elif data["data"] is none %}
                         <input autocomplete="off" autofocus class="form-control" id="{{ data['idDatatype'] }}" name="data_value" placeholder="{{ data['example'] }}" type="text">
-                    {% elif data["idDatatype"] == 1 or data["idDatatype"] == 2 %}
-                        <input readonly class="form-control" id="{{ data['idDatatype'] }}" name="data_value" value="{{ data['data'] }}" type="text">
                     {% else %}
                         <input autocomplete="off" class="form-control" id="{{ data['idDatatype'] }}" name="data_value" value="{{ data['data'] }}" type="text">
                     {% endif %}
@@ -24,9 +22,9 @@
                 </div><br>
             {% endfor %}
         {% else %}
-            <p>{{ profile['name'] }} não tem dados cadastrados :(</p>
+            <p>Não há dados cadastrados ou para cadastro.</p><br>
         {% endif %}
-        <input hidden name="idPerson" value="{{ profile['id'] }}">
+        <input hidden name="idPerson" value="{{ person_id }}">
         <button class="btn btn-primary" type="submit">Enviar</button>
     </form>
 {% endblock %}

@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 
 {% block main %}
-	<p align="right" class="text-muted"><a href="/{{ who }}/cadastro">Cadastrar</a> {{ who }}, <a href="/{{ who }}/busca">buscar</a> ou ver uma <a href="/{{ who }}/lista">lista</a>?</p>
+	<p align="right" class="text-muted"><a href="/beneficios/cadastro">Cadastrar</a> beneficios, <a href="/beneficios/busca">buscar</a> ou ver uma <a href="/beneficios/lista">lista</a>?</p>
 	<br>
-	<h1>Cadastro {{ who }}</h1>
-	<p class="text-muted">ATENÇÃO: Antes de prosseguir, confira através da <a href="/{{ who }}/busca">busca</a> se o nome já não foi cadastrado.</p>
-	<form action="/{{ who }}/cadastro" method="post">
+	<h1>Cadastro beneficios</h1>
+	<p class="text-muted">ATENÇÃO: Antes de prosseguir, confira através da <a href="/beneficios/busca">busca</a> se o nome já não foi cadastrado.</p>
+	<form action="/beneficios/cadastro" method="post">
         <div class="form-group row">
             <label for="name" class="col-sm-2 col-form-label">Nome:</label>
             <div class="col-sm-10">

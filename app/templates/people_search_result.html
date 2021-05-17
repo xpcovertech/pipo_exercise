@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/pessoas/cadastro">Cadastrar</a> pessoas, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
+	<br>
+	<h1>Resultado da Busca</h1>
+	{% if people_list|length %}
+		{% for person in people_list|sort(attribute='name') %}
+			<a href="/pessoas/perfil/{{ person['id'] }}"}}>{{ person["name"] }}</a><br>
+		{% endfor %}
+	{% else %}
+		<p>Nenhum resultado encontrado :(</p>
+	{% endif %}
+{% endblock %}

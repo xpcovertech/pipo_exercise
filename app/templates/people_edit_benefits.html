@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block main %}
+	<p align="right" class="text-muted"><a href="/pessoas/cadastro">Cadastrar</a>, <a href="/pessoas/busca">buscar</a> ou ver uma <a href="/pessoas/lista">lista</a>?</p>
+	<br>
+	<h1>Editar Benefícios para {{ profile['name'] }}</h1><br>
+	<form action="/pessoas/editar/{{ profile['id'] }}" method="post">
+        {% if benefits_list|length %}
+            <h4>Selecione os benefícios que gostaria de remover ou adicionar.</h4>
+            <h5>Benefícios Cadastrados</h5>
+            <div class="form-check">
+                {% if profile["benefits"]|length > 0 %}
+                    {% for benefit in benefits_list %}
+                        {% if benefit in profile["benefits"] %}
+                            <input class="form-check-input" type="checkbox" id="{{ benefit['idBenefit'] }}" name="idBenefit" value="{{ benefit['idBenefit'] }}" checked>
+                            <label class="form-check-label" for="{{ benefit['idBenefit'] }}">{{ benefit['name'] }}</label><br>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p>Nenhum benefício cadastrado :(</p>
+                {% endif %}
+            </div>
+            <br>
+            <h5>Benefícios Não Cadastrados</h5>
+            <div class="form-check">
+                {% for benefit in benefits_list %}
+                    {% if benefit not in profile["benefits"] %}
+                        <input class="form-check-input" type="checkbox" id="{{ benefit['idBenefit'] }}" name="idBenefit" value="{{ benefit['idBenefit'] }}">
+                        <label class="form-check-label" for="{{ benefit['idBenefit'] }}">{{ benefit['name'] }}</label><br>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <br>
+        {% else %}
+            <p>Não existem benefícios cadastrados para sua empresa</p>
+        {% endif %}
+        <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+{% endblock %}

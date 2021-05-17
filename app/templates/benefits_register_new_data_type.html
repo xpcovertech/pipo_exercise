@@ -10,11 +10,11 @@
                 <h4>Tipos de Dados já Cadastrados</h4>
                 <p class="text-muted">Confira na lista antes de cadastrar.</p>
                 {% if data_list|length %}
-                    {% for data in data_list|sort(attribute='name') %}
+                    {% for data in data_list|sort(attribute='id') %}
                         {{ data['name'] }}<br>
                     {% endfor %}
                 {% else %}
-                    <p>Não existem dados cadastrados.</p>
+                    <p>Não existem dados cadastrados no sistema.</p>
                 {% endif %}
             </div>
             <div =class="col">

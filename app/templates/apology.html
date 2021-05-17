@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <img alt="{{ top }}" src="http://memegen.link/custom/{{ top | urlencode }}/{{ bottom | urlencode }}.jpg?alt=https://i.imgur.com/CsCgN7Ll.png" title="{{ top }}" style="display: block; margin-left: auto; margin-right: auto; width: 45%">
+    <p>{{ description }}
+{% endblock %}

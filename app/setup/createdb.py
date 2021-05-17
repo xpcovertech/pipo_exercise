@@ -6,7 +6,6 @@ def create_connection(db_file):
     conn = None
     try:
         conn = sqlite3.connect(db_file)
-        print("Database created!")
     except Error as e:
         print("Error creating database.")
     finally:
@@ -15,4 +14,3 @@ def create_connection(db_file):
 
 if __name__ == '__main__':
     create_connection(r"../db/pipo.db")
-
