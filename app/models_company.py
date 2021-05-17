@@ -1,6 +1,29 @@
 from db import company_exists, query_company_name, query_company_people, query_company_benefits
 from utils import is_int
 
+'''
+This is a webapp that manages employees' benefits.
+For more visit https://github.com/leorapini/pipo_exercise
+Code written by Leo Rapini
+
+*Glossary:
+Glossary: A person is every employee registered in the database. 
+The benefit is the name of any type of benefit plan. Ex. Health Insurance. 
+The company is an employer of people that have benefits registered to them, 
+allowing people to be enrolled in those benefits. Type of data or Datatype 
+is the type of information that a benefit plan requires from a person at 
+enrollment. Ex. Date of Birth
+
+Please check the SQL schema in the folder Documentation before reading the code. 
+It will make it a more pleasant experience, I promise. 
+'''
+
+'''
+models_company.py
+
+Company Profile object and its correlated methods. 
+'''
+
 class CompanyProfile():
 	def __init__(self, idCompany):
 		self.idCompany = idCompany
@@ -28,7 +51,6 @@ class CompanyProfile():
 			raise Exception("This company id doesn't exist")
 		return company_name[0]["name"]
 
-	# Is it possible for companys to have no employees? No, it shouldnt be.
 	def get_people(self):
 		if not is_int(self.idCompany):
 			raise TypeError

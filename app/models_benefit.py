@@ -2,6 +2,29 @@ from db import benefit_exists, query_benefit_name, query_benefit_companies
 from db import query_benefit_people_by_company, query_benefit_data_types
 from utils import is_int
 
+'''
+This is a webapp that manages employees' benefits.
+For more visit https://github.com/leorapini/pipo_exercise
+Code written by Leo Rapini
+
+*Glossary:
+Glossary: A person is every employee registered in the database. 
+The benefit is the name of any type of benefit plan. Ex. Health Insurance. 
+The company is an employer of people that have benefits registered to them, 
+allowing people to be enrolled in those benefits. Type of data or Datatype 
+is the type of information that a benefit plan requires from a person at 
+enrollment. Ex. Date of Birth
+
+Please check the SQL schema in the folder Documentation before reading the code. 
+It will make it a more pleasant experience, I promise. 
+'''
+
+'''
+models_benefit.py
+
+Benefit Profile object and its correlated methods. 
+'''
+
 class BenefitProfile():
 	def __init__(self, idBenefit):
 		self.idBenefit = idBenefit
@@ -46,7 +69,6 @@ class BenefitProfile():
 			raise TypeError
 		if not benefit_exists(self.idBenefit):
 			raise Exception("This benefit id doesn't exist")
-		#benefit_companies = query_benefit_companies(self.idBenefit)
 		benefit_people = query_benefit_people_by_company(self.idBenefit, idCompany)
 		people_by_company = []
 		if len(benefit_people) > 0:

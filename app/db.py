@@ -4,6 +4,30 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+'''
+This is a webapp that manages employees' benefits.
+For more visit https://github.com/leorapini/pipo_exercise
+Code written by Leo Rapini
+
+*Glossary:
+Glossary: A person is every employee registered in the database. 
+The benefit is the name of any type of benefit plan. Ex. Health Insurance. 
+The company is an employer of people that have benefits registered to them, 
+allowing people to be enrolled in those benefits. Type of data or Datatype 
+is the type of information that a benefit plan requires from a person at 
+enrollment. Ex. Date of Birth
+
+Please check the SQL schema in the folder Documentation before reading the code. 
+It will make it a more pleasant experience, I promise. 
+'''
+
+'''
+db.py
+
+SQLAlchemy ORM implementation for SQLite database. Except when noted otherwise
+all functions return a list of dictionaries or an empty dictionary.
+'''
+
 engine = create_engine('sqlite:///db/pipo.db')
 Base = declarative_base()
 Base.metadata.reflect(engine)
@@ -40,6 +64,8 @@ class CompanyBenefit(Base):
 # COMPANY QUERIES
 # COMPANY QUERIES
 def company_exists(idCompany):
+	""" Receives a company id and returns True if the company exists
+	and False if it doesn't """
 	if not is_int(idCompany):
 			raise TypeError
 	results = (db.query(Company.id)
@@ -73,7 +99,9 @@ def query_company_benefits(idCompany):
 
 # PERSON QUERIES
 # PERSON QUERIES
-def person_exists(idPerson): # This has been tested
+def person_exists(idPerson):
+	""" Receives a person id and returns True if the person exists
+	and False if it doesn't """
 	if not is_int(idPerson):
 			raise TypeError
 	results = (db.query(Person.id)
@@ -139,6 +167,7 @@ def query_person_name_like_by_company(person_name, idCompany):
 	return results	
 
 def query_person_in_company(idPerson, idCompany):
+	""" Returns None in case no result is found """
 	results = (db.query(Person.id)
 				.filter(Person.idCompany == idCompany)
 				.filter(Person.id == idPerson).first())
@@ -195,7 +224,9 @@ def delete_data_with_persondata_id(persondata_id):
 
 # BENEFIT & DATATYPE QUERIES
 # BENEFIT & DATATYPE QUERIES
-def benefit_exists(idBenefit): 
+def benefit_exists(idBenefit):
+	""" Receives a beenfit id and returns True if the benefit exists
+	and False if it doesn't """
 	if not is_int(idBenefit):
 			raise TypeError
 	results = (db.query(Benefit.id)
@@ -295,12 +326,14 @@ def query_benefit_name_like_by_company(benefit_name, idCompany):
 	return results	
 
 def query_person_admission_date(idPerson, idBenefit):
+	""" Returns None in case no result is found """
 	results = (db.query(PersonBenefit.timestamp)
 				.filter(PersonBenefit.idPerson == idPerson)
 				.filter(PersonBenefit.idBenefit == idBenefit).first())
 	return results
 
 def query_benefit_in_company(idBenefit, idCompany):
+	""" Returns None in case no result is found """
 	results = (db.query(CompanyBenefit.id)
 				.filter(CompanyBenefit.idBenefit == idBenefit)
 				.filter(CompanyBenefit.idCompany == idCompany).first())

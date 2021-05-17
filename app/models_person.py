@@ -2,6 +2,29 @@ from db import person_exists, query_person_name_idcompany_cpf, query_person_admi
 from db import query_person_benefits, query_person_data
 from utils import is_int
 
+'''
+This is a webapp that manages employees' benefits.
+For more visit https://github.com/leorapini/pipo_exercise
+Code written by Leo Rapini
+
+*Glossary:
+Glossary: A person is every employee registered in the database. 
+The benefit is the name of any type of benefit plan. Ex. Health Insurance. 
+The company is an employer of people that have benefits registered to them, 
+allowing people to be enrolled in those benefits. Type of data or Datatype 
+is the type of information that a benefit plan requires from a person at 
+enrollment. Ex. Date of Birth
+
+Please check the SQL schema in the folder Documentation before reading the code. 
+It will make it a more pleasant experience, I promise. 
+'''
+
+'''
+models_person.py
+
+Person Profile object and its correlated methods. 
+'''
+
 class PersonProfile():
 	def __init__(self, idPerson):
 		self.idPerson = idPerson
