@@ -163,7 +163,7 @@ python3 -m unittest
 
 To run tests for a specific module type:
 ```bash
-python3 -m unittest tests.test_[name of the module]
+python3 -m unittest tests.test_[name_of_the_module]
 ```
 For example, to run tests for the app module:
 ```bash
@@ -173,7 +173,7 @@ python3 -m unittest tests.test_app
 
 For running a specif test for a specific function type:
 ```bash
-python3 -m unittest tests.test_[name of the module].[name of the function]
+python3 -m unittest tests.test_[name_of_the_module].Test[NameOfTheFunction]
 ```
 For example, to run tests for the login function in the app module:
 ```bash
