@@ -1,3 +1,12 @@
+# Updates to v0.2
+
+- New file structure for easier reading and maintenance
+- Implementation of SQAlachemy ORM
+- Implementation of automated tests with unittest
+- Added error management
+- Refactoring all around
+- New Running it & Testing sections in the README (see more below)
+
 # Pipo Saúde Exercise
 
 [Pipo](https://www.piposaude.com.br/) is a Brazilian Startup in the healthcare industry with the bold goal of revolutionizing people's experience with health services. As part of their hiring process, they ask potential software engineers to develop a solution to two of their main challenges: procurement process flow and data management. The goal of the solution I've developed is to address those two challenges through a simplified workflow for their clients' HR person and a lean data structure for Pipo. The code is the bridge between those two things.
@@ -64,20 +73,67 @@ I really enjoyed developing this solution and thinking through its challenges. I
 
 PS: There are more screenshots available in the Documents folder. 
 
+
 ## Running it
 
-To play around with the platform, simply make sure you have the requirements installed and clone the project.
+To install and run the application follow each step below by typing each command in your terminal.
 
-In termintal, inside the setup folder run:
+First clone the repository,
+```bash
+git clone https://github.com/leorapini/pipo_exercise.git
+```
+
+Navigate to the app's directory,
+```bash
+cd pipo_exercise/app
+``` 
+
+Create a virtual environment with virtualenv by typing:
+```bash
+virtualenv env -p python3
+```
+
+And enter that enviroment with the command below:
+```bash
+source env/bin/activate 
+```
+
+To install all requirements in the virtual enviroment using pip type:
+```bash
+pip install -r requirements.txt   
+```
+
+That's the first part. Now to start with a fresh pre-populated database:
+
+Navigate to the setup's directory:
+```bash
+cd setup
+```
+
+And run the setup script by typing: 
 ```bash
 ./setup.sh
 ```
 or
 ```bash
-bash setup
+bash setup.sh
 ```
 
 This way you'll have a pre-populated database with information for three users and employees from three fictitious companies.
+
+You can run the application with:
+```bash
+flask run
+```
+or (if you'd like to run in debug mode)
+```bash
+python3 app.py
+```
+
+Open your browser and type:
+```url
+http://127.0.0.1:5000/
+```
 
 To log in as:
 
@@ -90,22 +146,47 @@ To log in as:
 I recommend using [Gerador de CPF](https://www.geradorcpf.com/) to generate new CPFs if you want to register new employees. This is needed because of the CPF checker/validator. 
 
 
+## Testing
+
+To run all automated tests, in the app directory, type:
+```bash
+python3 -m unittest
+```
+
+To run tests for a specific module type:
+```bash
+python3 -m unittest tests.test_[name of the module]
+```
+For example, to run tests for the app module:
+```bash
+python3 -m unittest tests.test_app
+```
+
+For running a specif test for a specific function type:
+```bash
+python3 -m unittest tests.test_[name of the module].[name of the function]
+```
+For example, to run tests for the login function in the app module:
+```bash
+python3 -m unittest tests.test_app.TestLogin
+```
+
+The naming of all tests for specific functions follow the same pattern starting with the word Test in capital letter, with the rest of the name with capital letters and no spaces or underscores. For example, to test the function/method get_details from the module models_person, you can type:
+```bash
+python3 -m unittest tests.test_models_person.TestGetDetails 
+```
+
+
 ## Technologies
 
   - Python 3.9.2
   - SQLite 3.32.3
-  - SQLAlchemy 1.4.7
-  - Flask 1.1.2
-  - Jinja 2.11.3
+  - SQLAlchemy 1.4.15
+  - Flask 2.0.0
+  - Jinja2 3.0.0
   - Bootstrap 4
 
  
-## Todo
-  
-  - Refactor, refactor and refactor. Some functions and SQL queries can be split into two, others combined. As I've heard before but related to art: "You never finish an art piece, you give up on it." 
-  - Unit testing. Even though I did my best to test the functions, I feel like I needed to do more unit tests to make sure it won't crash. 
-  - Implement a robust input checking algorithm for the most common types of data / information. 
-  - Implement some form of authentication and/or security measures.
 
 
 
