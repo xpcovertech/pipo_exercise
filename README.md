@@ -1,4 +1,4 @@
-# Updates to v0.2
+## Updates to v0.2
 
 - New file structure for easier reading and maintenance
 - Implementation of SQAlachemy ORM
