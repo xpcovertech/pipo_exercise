@@ -29,8 +29,6 @@ Please check the SQL schema in the folder Documentation before reading the code.
 It will make it a more pleasant experience, I promise. 
 '''
 
-# SETUP 
-# SETUP
 # SETUP
 app = Flask(__name__)
 env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
@@ -68,13 +66,15 @@ def index():
 	""" Returns index.html with header information """
 	return render_template("index.html", header = get_header(session))
 
+
 # HOME BENEFITS
 @app.route("/beneficios", methods=['GET'])
 @login_required
 def benefits_home():
-	""" Returns home.html with header for beneficios.
-	This was done so I didn't have to create a html file for each page."""
+	""" Returns home.html with header for beneficios. The 'who' is simply a place holder 
+	for the name of the page. The same html file is used for both beneficios and pessoas."""
 	return render_template("home.html", header = get_header(session), who = "beneficios")
+
 
 # LIST BENEFITS
 @app.route("/beneficios/lista", methods=['GET'])
@@ -89,8 +89,8 @@ def benefits_list():
 @app.route("/beneficios/busca", methods=['GET', 'POST'])
 @login_required
 def benefits_search():
-	""" If 'GET' returns the search page, if 'POST' returns the result of that search for 
-	Benefits """
+	""" If 'GET' method, returns the search page, if 'POST' method, returns the result of 
+	that search for Benefits """
 	if request.method == "POST":
 		benefit_name = request.form.get("name")
 		if benefit_name:
@@ -109,12 +109,11 @@ def benefits_search():
 @app.route("/beneficios/cadastro", methods=['GET', 'POST'])
 @login_required
 def benefits_registration():
-	""" This is a complicated one but in summary it is the registration function/router for both
-	benefits and people. I suggest first reading the bottom part of the function with the 'else' 
-	bellow if request.. That is the 'GET', what is loaded before any form is submitted. On the
-	person registration part, in POST, it receives the information and checks it before calling
-	all other functions necessary for a complete registration. Once that it occurs successfully,
-	it returns the form for additional data to be inputed."""
+	""" If 'GET' method, returns the benefits registration page. If 'POST', it first checks if a
+	Benefit name has been entered, if not returns the registration page with an alert (whoops). If
+	so it calls the register new benefit function which will procced to check the validity of the 
+	name entered. If everything goes well, the new benefit profile is returned. Otherwise the
+	registration page is reloaded with an alert."""
 	if request.method == "POST":
 		name = request.form.get("name")
 		if name:
@@ -137,7 +136,10 @@ def benefits_registration():
 @app.route("/beneficios/perfil/<idWho>", methods=['GET'])
 @login_required
 def benefits_profile(idWho):
-	""" Receives id (idWho) and who (Person or Benefit) and loads it's profile page"""
+	""" Receives the benefit's id (idWho) and checks if the user is allowed to see
+	that benefit's profile. This is an upgrade from the last version in which anyone could 
+	see any benefit, even if the user's company wasn't registered with that benefit. If that
+	is the case an alert is shown to the user. Otherwise the benefit profile is returned."""
 	idWho = validate_benefit_idwho(idWho, session['idCompany'])
 	if idWho:
 		profile = BenefitProfile(idWho).get_profile()
@@ -155,6 +157,10 @@ def benefits_profile(idWho):
 @app.route("/beneficios/editar/<idWho>", methods=['GET', 'POST'])
 @login_required
 def benefits_data_types(idWho):
+	""" Receives the benefit's id (idWho) and checks if the user is allowed to edit that
+	benefits types of data. If 'GET' method, a list of all data types available and a list of the
+	Benefit's pre selected types of data is returned. If 'POST' method, the information received 
+	is checked and then updated to the database."""
 	idWho = validate_benefit_idwho(idWho, session['idCompany'])
 	if idWho:
 		if request.method == "POST":
@@ -187,8 +193,10 @@ def benefits_data_types(idWho):
 @app.route("/beneficios/cadastro/dado/<idWho>", methods=['GET','POST'])
 @login_required
 def benefits_register_new_data_type(idWho):
-	""" This function registers new types of data and returns the benefits 
-	profile aka idWho"""
+	""" Receives the benefit's id (idWho) and checks if the user is allowed to register a new 
+ 	type of data for that benefit. If 'GET' method, a list of all data types registered in
+ 	the database is returned. If 'POST' method, the new data type is checked before being
+ 	registered in the database and added to the list of data types of the benefit"""
 	idWho = validate_benefit_idwho(idWho, session['idCompany'])
 	if idWho:
 		if request.method == "POST":
@@ -221,9 +229,10 @@ def benefits_register_new_data_type(idWho):
 @app.route("/beneficios/<idBenefit>/pessoas/<idPerson>", methods=['GET'])
 @login_required
 def benefits_registration_card(idBenefit, idPerson):
-	""" Receives idBenefit and idPerson to show the persons registration form
-	(ficha de cadastro) with the information necessary to send over to the 
-	benefit provider """
+	""" Receives idBenefit and idPerson and checks if the user can see that benefit's 
+	registration card (benefit must be registered with the user's company as well as the person must
+	be a company employee). If the information checks out, the employee's (person) benefit 
+	registration card is returned with all correlated data """
 	if validate_registration_card(idBenefit, idPerson, session['idCompany']):
 		idBenefit = int(idBenefit)
 		idPerson = int(idPerson)
@@ -250,9 +259,10 @@ def benefits_registration_card(idBenefit, idPerson):
 @app.route("/beneficios/deletar", methods=['POST'])
 @login_required
 def benefits_delete_profile():
-	""" Receives who (pessoas or beneficios) and call a function to delete it's profile
-	and data from the database. That's why it's at the end of the code. Benefit is not
-	truly deleted from database, for it can still be used by other companys."""
+	""" Receives (through form) the id of the benefit to be deleted. First the
+	benefit id is checked and then deleted. Benefit is not truly deleted from database, 
+	for it can still be used by other companies. Only the company's registration with
+	that benefit is deleted """
 	idBenefit = str_to_int(request.form.get("idBenefit"))
 	if benefit_exists(idBenefit):
 		delete_benefit_profile(idBenefit, session["idCompany"])
@@ -268,8 +278,8 @@ def benefits_delete_profile():
 @app.route("/pessoas", methods=['GET'])
 @login_required
 def people_home():
-	""" Returns home.html with header for pessoas.
-	This was done so I didn't have to create a html file for each page."""
+	""" Returns home.html with header for pessoas. The 'who' is simply a place holder 
+	for the name of the page. The same html file is used for both beneficios and pessoas."""
 	return render_template("home.html", header = get_header(session), who = "pessoas")
 
 
@@ -307,13 +317,17 @@ def people_search():
 @app.route("/pessoas/cadastro", methods=['GET', 'POST'])
 @login_required
 def people_registration():
-	""" This is a complicated one but in summary it is the registration function/router for
-	people. I suggest first reading the bottom part of the function with the 'else' 
-	bellow if request.. That is the 'GET', what is loaded before any form is submitted. On the
-	person registration part, in POST, it receives the information and checks it before calling
-	all other functions necessary for a complete registration. Once that it occurs successfully,
-	it returns the form for additional data to be inputed."""
-	who = "pessoas"
+	""" This is a more complex function. First a list of all benefits registered with the 
+	company is generated. If 'GET' method, returns the people registration page along with 
+	the list of all benefits registered with the user's company. 
+	If 'POST', it checks if both Person' name has been entered and if the cpf is a valid 
+	cpf number in the correct cpf format, if not returns the registration page with an alert 
+	(whoops). If valid, it calls the register new person function which will procced to check the 
+	validity of the cpf entered against the person database/table. If everything goes well, 
+	the function checks if a benefit was selected (or more) during registration. 
+	If so, the person is also registered with those benefits. If that is the case the
+	people_register_data page is returned to continue the data registration process. If not,
+	an updated list of all company people is returned."""
 	company_benefits = CompanyProfile(session['idCompany']).get_benefits()
 	if request.method == 'POST':
 		name = request.form.get("name")
@@ -349,8 +363,8 @@ def people_registration():
 @app.route("/pessoas/cadastro/beneficio", methods=['POST'])
 @login_required
 def people_data_registration():
-	""" This function simply registers the additional data for person
-	submitted by calling register_data_to_person() and returns the persons profile """
+	""" This function simply registers the additional data for person submitted by calling 
+	register_data_to_person() and returns the persons updated profile """
 	idPerson = str_to_int(request.form.get("idPerson"))
 	ids_datatype = str_list_to_int(request.form.getlist("idDatatype"))
 	data_values = request.form.getlist("data_value")
@@ -373,7 +387,10 @@ def people_data_registration():
 @app.route("/pessoas/perfil/<idWho>", methods=['GET'])
 @login_required
 def people_profile(idWho):
-	""" Receives id (idWho) and who (Person or Benefit) and loads it's profile page"""
+	""" Receives the person's id (idWho) and checks if the user is allowed to see
+	that person's profile. This is an upgrade from the last version in which anyone could 
+	see any person, even if the person wasn't part of the company. If that is the case an 
+	alert is shown to the user. Otherwise the person's profile is returned."""
 	idWho = validate_person_idwho(idWho, session['idCompany'])
 	if idWho:
 		profile = PersonProfile(idWho).get_profile()
@@ -390,10 +407,13 @@ def people_profile(idWho):
 @app.route("/pessoas/editar/<idWho>", methods=['GET', 'POST'])
 @login_required
 def people_edit_benefits(idWho):
-	""" This is another complicated one, and in another time, could be refactored 
-	into smaller functions. It receives who (benefit or person) and idWho (it's id),
-	then it proceeds in checking the values before calling other functions to
-	update its profile """
+	""" It receives the person's id and checks if the user can edit that person's
+	benefits. Then it proceeds in checking the list of benefits added and or excluded
+	from the person's profile. If new data might be necessary (needs_data_check), it
+	returns the people_register_data with a list of all combined data (new and current)
+	for data input. Benefit_updated_data_types is only True when the benefit updates its
+	list of data types and those data types don't match the person's data in the database,
+	requiring new data inputs """
 	idWho = validate_person_idwho(idWho, session['idCompany'])
 	if idWho:
 		if request.method == "POST":
@@ -423,10 +443,9 @@ def people_edit_benefits(idWho):
 @app.route("/dados/editar/<idWho>", methods=['GET'])
 @login_required
 def people_edit_data(idWho):
-	""" This is another complicated one, and in another time, could be refactored 
-	into smaller functions. It receives who (benefit or person) and idWho (it's id),
-	then it proceeds in checking the values before calling other functions to
-	update its profile """
+	""" It receives the person's id and checks if the user can edit that person's
+	data. Then it proceeds in getting a list of all data for that person 
+	and returns the people_register_data page """
 	idWho = validate_person_idwho(idWho, session['idCompany'])
 	if idWho:
 		person_data = PersonProfile(idWho).get_data()
@@ -440,12 +459,14 @@ def people_edit_data(idWho):
 		return render_template("people_list.html", header = get_header(session), 
 								people_list = people_list, whoops = whoops)
 
+
 # DELETE PERSON PROFILE
 @app.route("/pessoas/deletar", methods=['POST'])
 @login_required
 def people_delete_profile():
-	""" Receives who (pessoas or beneficios) and call a function to delete it's profile
-	and data from the database. That's why it's at the end of the code. """
+	""" Receives (through form) the id of the person to be deleted. First the
+	person id is checked and then deleted. The person's row in the person table,
+	and all other data connected to that person is also deleted. """
 	idPerson = str_to_int(request.form.get("idPerson"))
 	person_admin = PersonProfile(idPerson).get_admin()
 	if person_admin['name'] != "Admin":
@@ -462,11 +483,11 @@ def people_delete_profile():
 # LOGIN
 @app.route("/login", methods=["GET", "POST"])
 def login():
-	""" The beginning at the end. Who knew! This function receives the user's
-	cpf and checks it's values before allowing them to login. There's no 
-	security measure implemented whatsoever. If the cpf matches one of the 
-	admins, it proceeds to load all information necessary on the session (dict)
-	for further use regarding the user and their company."""
+	""" This function receives the user's cpf and checks it's values before 
+	allowing them to login. There's no security measure implemented whatsoever. 
+	If the cpf matches one of the admins, it proceeds to load all information 
+	necessary on the session (dict) for further use regarding the user and 
+	their company."""
 	session.clear()
 	if request.method == "POST":
 		cpf = request.form.get("cpf")
@@ -498,18 +519,20 @@ def login():
 	else: # 'GET'
 		return render_template("login.html", header = get_header(session))
 
+
 @app.route("/logout")
 def logout():
+	""" Logs the user out and clears the flask session """
 	session.clear()
 	return redirect("/")
 
 
 def apology(message, code=400):
-    """ Render message as an apology to user. """
+    """ Render error message as a meme apology to user. """
     def escape(string):
         """
-        Escape special characters.
-
+        Escape special characters for memegen.
+        Created by Jace Browning:
         https://github.com/jacebrowning/memegen#special-characters
         """
         for old, new in [("-", "--"), (" ", "-"), ("_", "__"), ("?", "~q"),
@@ -520,7 +543,7 @@ def apology(message, code=400):
     										header = get_header(session)), code
 
 def errorhandler(error):
-    """ Handle error """
+    """ Handle errors """
     if not isinstance(error, HTTPException):
         error = InternalServerError()
     return apology(error.name, error.code)
