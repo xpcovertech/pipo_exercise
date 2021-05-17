@@ -78,12 +78,12 @@ PS: There are more screenshots available in the Documents folder.
 
 To install and run the application follow each step below by typing each command in your terminal.
 
-First clone the repository,
+First clone the repository:
 ```bash
 git clone https://github.com/leorapini/pipo_exercise.git
 ```
 
-Navigate to the app's directory,
+Navigate to the app's directory:
 ```bash
 cd pipo_exercise/app
 ``` 
@@ -121,7 +121,12 @@ bash setup.sh
 
 This way you'll have a pre-populated database with information for three users and employees from three fictitious companies.
 
-You can run the application with:
+Now go back to the app directory:
+```bash
+cd .. 
+```
+
+And you can run the application with:
 ```bash
 flask run
 ```
@@ -130,10 +135,12 @@ or (if you'd like to run in debug mode)
 python3 app.py
 ```
 
-Open your browser and type:
+Open your browser and type in the address bar:
 ```url
 http://127.0.0.1:5000/
 ```
+
+Voilá!
 
 To log in as:
 
@@ -153,6 +160,7 @@ To run all automated tests, in the app directory, type:
 python3 -m unittest
 ```
 
+
 To run tests for a specific module type:
 ```bash
 python3 -m unittest tests.test_[name of the module]
@@ -161,6 +169,7 @@ For example, to run tests for the app module:
 ```bash
 python3 -m unittest tests.test_app
 ```
+
 
 For running a specif test for a specific function type:
 ```bash
@@ -171,7 +180,7 @@ For example, to run tests for the login function in the app module:
 python3 -m unittest tests.test_app.TestLogin
 ```
 
-The naming of all tests for specific functions follow the same pattern starting with the word Test in capital letter, with the rest of the name with capital letters and no spaces or underscores. For example, to test the function/method get_details from the module models_person, you can type:
+The naming of all tests for specific functions follow the same pattern starting with the word Test in capital letter, with the rest of the name with capital letters and no spaces or underscores. For example, to test the function/method get_details() from the module models_person, you can type:
 ```bash
 python3 -m unittest tests.test_models_person.TestGetDetails 
 ```
