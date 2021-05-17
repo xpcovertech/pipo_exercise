@@ -171,7 +171,7 @@ python3 -m unittest tests.test_app
 ```
 
 
-For running a specif test for a specific function type:
+For running a tests for a specific function type:
 ```bash
 python3 -m unittest tests.test_[name_of_the_module].Test[NameOfTheFunction]
 ```
