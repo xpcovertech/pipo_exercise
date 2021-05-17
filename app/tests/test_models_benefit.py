@@ -3,7 +3,7 @@ from subprocess import call
 
 from models_benefit import BenefitProfile
 
-class TestBenefitProfile(unittest.TestCase):
+class TestGetProfile(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -65,7 +65,7 @@ class TestBenefitProfile(unittest.TestCase):
 			expected_result = self.profile_three_data.get(key)
 			self.assertEqual(actual_result, expected_result)
 
-class TestGetBenefitName(unittest.TestCase):
+class TestGetName(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -91,19 +91,6 @@ class TestGetBenefitName(unittest.TestCase):
 		actual_result = self.profile_three.get_name()
 		expected_result = "Plano Dental Sorriso"
 		self.assertEqual(actual_result, expected_result)
-
-
-class TestGetBenefitNameError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = BenefitProfile(1)
-		self.profile_two = BenefitProfile(2)
-		self.profile_three = BenefitProfile(3)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
 
 	def test_get_benefit_name_benefit_doesnt_exist(self):
 		with self.assertRaises(Exception):
@@ -134,7 +121,7 @@ class TestGetBenefitNameError(unittest.TestCase):
 			BenefitProfile(True).get_name()
 
 
-class TestGetBenefitCompanies(unittest.TestCase):
+class TestGetCompanies(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -165,19 +152,6 @@ class TestGetBenefitCompanies(unittest.TestCase):
 							{"idCompany": 1, "name": "Wonka Industries"}]
 		self.assertEqual(actual_result, expected_result)
 
-
-class TestGetBenefitCompaniesError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = BenefitProfile(1)
-		self.profile_two = BenefitProfile(2)
-		self.profile_three = BenefitProfile(3)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
-
 	def test_get_benefit_companies_company_doesnt_exist(self):
 		with self.assertRaises(Exception):
 			BenefitProfile(9999).get_companies()
@@ -207,7 +181,7 @@ class TestGetBenefitCompaniesError(unittest.TestCase):
 			BenefitProfile(True).get_companies()
 
 
-class TestGetBenefitPeopleByCompanies(unittest.TestCase):
+class TestGetPeopleByCompany(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -233,19 +207,6 @@ class TestGetBenefitPeopleByCompanies(unittest.TestCase):
 		actual_result = self.profile_three.get_people_by_company(1)
 		expected_result = [{'idPerson': 1, 'idCompany': 1, 'name': 'Pessoa da Wonka'}]
 		self.assertEqual(actual_result, expected_result)
-
-
-class TestGetBenefitPeopleByCompaniesError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = BenefitProfile(1)
-		self.profile_two = BenefitProfile(2)
-		self.profile_three = BenefitProfile(3)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
 
 	def test_get_benefit_people_by_company_company_doesnt_exist(self):
 		with self.assertRaises(Exception):
@@ -276,7 +237,7 @@ class TestGetBenefitPeopleByCompaniesError(unittest.TestCase):
 			BenefitProfile(True).get_people_by_company()
 
 
-class TestGetBenefitDataTypes(unittest.TestCase):
+class TestGetDataTypes(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -311,19 +272,6 @@ class TestGetBenefitDataTypes(unittest.TestCase):
 							{"idDatatype": 5, "name": "Peso (kg)", "example": "Digite somente os números. Ex. 75"},
 							{"idDatatype": 6, "name": "Altura (cm)", "example": "Digite somente os números em centímetros. Ex. 175"}]
 		self.assertEqual(actual_result, expected_result)
-
-
-class TestGetBenefitDataTypesError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = BenefitProfile(1)
-		self.profile_two = BenefitProfile(2)
-		self.profile_three = BenefitProfile(3)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
 
 	def test_get_benefit_data_types_company_doesnt_exist(self):
 		with self.assertRaises(Exception):

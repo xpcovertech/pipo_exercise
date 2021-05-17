@@ -3,7 +3,7 @@ from subprocess import call
 
 from models_person import PersonProfile
 
-class TestPersonProfile(unittest.TestCase):
+class TestGetProfile(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -64,7 +64,7 @@ class TestPersonProfile(unittest.TestCase):
 			self.assertEqual(actual_result, expected_result)
 
 
-class TestGetPersonNameIdcompanyCpf(unittest.TestCase):
+class TestGetDetails(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -90,19 +90,6 @@ class TestGetPersonNameIdcompanyCpf(unittest.TestCase):
 		actual_result = self.profile_three.get_details()
 		expected_result = {"name": "Augusto Wozniak", "idCompany": 3, "cpf": "007.123.232-12"}
 		self.assertEqual(actual_result, expected_result)
-
-
-class TestGetPersonNameIdcompanyCpfError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = PersonProfile(1)
-		self.profile_two = PersonProfile(2)
-		self.profile_three = PersonProfile(10)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
 
 	def test_get_person_name_doesnt_exist(self):
 		with self.assertRaises(Exception):
@@ -133,7 +120,7 @@ class TestGetPersonNameIdcompanyCpfError(unittest.TestCase):
 			PersonProfile(True).get_details()
 
 
-class TestGetPersonAdmin(unittest.TestCase):
+class TestGetAdmin(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -159,19 +146,6 @@ class TestGetPersonAdmin(unittest.TestCase):
 		actual_result = self.profile_three.get_admin()
 		expected_result = {"level": 0, "name": "Colaborador"}
 		self.assertEqual(actual_result, expected_result)
-
-
-class TestGetPersonAdminError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = PersonProfile(1)
-		self.profile_two = PersonProfile(2)
-		self.profile_three = PersonProfile(10)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
 
 	def test_get_person_name_doesnt_exist(self):
 		with self.assertRaises(Exception):
@@ -202,7 +176,7 @@ class TestGetPersonAdminError(unittest.TestCase):
 			PersonProfile(True).get_admin()
 
 
-class TestGetPersonBenefits(unittest.TestCase):
+class TestGetBenefits(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -229,19 +203,6 @@ class TestGetPersonBenefits(unittest.TestCase):
 		actual_result = self.profile_three.get_benefits()
 		expected_result = []
 		self.assertEqual(actual_result, expected_result)
-
-
-class TestGetPersonBenefitsError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = PersonProfile(1)
-		self.profile_two = PersonProfile(2)
-		self.profile_three = PersonProfile(10)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
 
 	def test_get_person_benefits_doesnt_exist(self):
 		with self.assertRaises(Exception):
@@ -272,7 +233,7 @@ class TestGetPersonBenefitsError(unittest.TestCase):
 			PersonProfile(True).get_benefits()
 
 
-class TestGetPersonData(unittest.TestCase):
+class TestGetData(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -300,19 +261,6 @@ class TestGetPersonData(unittest.TestCase):
 		actual_result = self.profile_three.get_data()
 		expected_result = []
 		self.assertEqual(actual_result, expected_result)
-
-
-class TestGetPersonDataError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = PersonProfile(1)
-		self.profile_two = PersonProfile(2)
-		self.profile_three = PersonProfile(10)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
 
 	def test_get_person_data_doesnt_exist(self):
 		with self.assertRaises(Exception):

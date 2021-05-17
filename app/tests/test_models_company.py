@@ -3,7 +3,7 @@ from subprocess import call
 
 from models_company import CompanyProfile
 
-class TestCompanyProfile(unittest.TestCase):
+class TestGetProfile(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -75,60 +75,6 @@ class TestCompanyProfile(unittest.TestCase):
 			expected_result = self.profile_three_data.get(key)
 			self.assertEqual(actual_result, expected_result)
 
-
-class TestCompanyProfileError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = CompanyProfile(1)
-		self.profile_two = CompanyProfile(2)
-		self.profile_three = CompanyProfile(3)
-
-		self.profile_one_data = {
-								"id": 1,
-								"name": "Wonka Industries",
-								"people": 
-									[{'idPerson': 5, 'name': 'Fernando Augusto Rodrigues'}, 
-									{'idPerson': 13, 'name': 'João Patricio'}, 
-									{'idPerson': 4, 'name': 'Mariana Fagundes'}, 
-									{'idPerson': 14, 'name': 'Marília Roberta Almeida'}, 
-									{'idPerson': 6, 'name': 'Paula Macedo Gomes'}, 
-									{'idPerson': 1, 'name': 'Pessoa da Wonka'}],
-								"benefits":
-									[{'idBenefit': 3, 'name': 'Plano Dental Sorriso'}, 
-									{'idBenefit': 4, 'name': 'Plano de Saúde Mente Sã, Corpo São'}, 
-									{'idBenefit': 1, 'name': 'Plano de Saúde Norte Europa'}, 
-									{'idBenefit': 2, 'name': 'Plano de Saúde Pampulha Intermédica'}]
-								}
-		self.profile_two_data = {
-								"id": 2,
-								"name": "Tio Patinhas Bank",
-								"people": 
-									[{'idPerson': 2, 'name': 'Pessoa da Tio Patinhas'}, 
-									{'idPerson': 8, 'name': 'Rafaela Dias Silva'}, 
-									{'idPerson': 7, 'name': 'Ricardo Pontes'}, 
-									{'idPerson': 9, 'name': 'Romario Pacheco'}],
-								"benefits":
-									[{'idBenefit': 3, 'name': 'Plano Dental Sorriso'}, 
-									{'idBenefit': 4, 'name': 'Plano de Saúde Mente Sã, Corpo São'}, 
-									{'idBenefit': 2, 'name': 'Plano de Saúde Pampulha Intermédica'}]
-								}
-		self.profile_three_data = {
-								"id": 3,
-								"name": "Acme Co",
-								"people": 
-									[{'idPerson': 10, 'name': 'Augusto Wozniak'}, 
-									{'idPerson': 11, 'name': 'Otavio Oliveira'}, 
-									{'idPerson': 3, 'name': 'Pessoa da Acme'},
-									{'idPerson': 12, 'name': 'Waldisney Gates'}],
-								"benefits":
-									[{'idBenefit': 3, 'name': 'Plano Dental Sorriso'}, 
-									{'idBenefit': 1, 'name': 'Plano de Saúde Norte Europa'}]
-								}
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
-
 	def test_get_profile_company_doesnt_exist(self):
 		with self.assertRaises(Exception):
 			CompanyProfile(0).get_name()
@@ -158,7 +104,7 @@ class TestCompanyProfileError(unittest.TestCase):
 			CompanyProfile(False).get_name()
 
 
-class TestGetCompanyName(unittest.TestCase):
+class TestGetName(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -184,18 +130,6 @@ class TestGetCompanyName(unittest.TestCase):
 		actual_result = self.profile_three.get_name()
 		expected_result = "Acme Co"
 		self.assertEqual(actual_result, expected_result)
-
-class TestGetCompanyNameError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = CompanyProfile(1)
-		self.profile_two = CompanyProfile(2)
-		self.profile_three = CompanyProfile(3)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
 
 	def test_get_company_name_company_doesnt_exist(self):
 		with self.assertRaises(Exception):
@@ -226,7 +160,7 @@ class TestGetCompanyNameError(unittest.TestCase):
 			CompanyProfile(True).get_name()
 
 
-class TestGetCompanyPeople(unittest.TestCase):
+class TestGetPeople(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -264,19 +198,6 @@ class TestGetCompanyPeople(unittest.TestCase):
 							{'idPerson': 12, 'name': 'Waldisney Gates'}]
 		self.assertEqual(actual_result, expected_result)
 
-
-class TestGetCompanyPeopleError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = CompanyProfile(1)
-		self.profile_two = CompanyProfile(2)
-		self.profile_three = CompanyProfile(3)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
-
 	def test_get_company_people_company_doesnt_exist(self):
 		with self.assertRaises(Exception):
 			CompanyProfile(9999).get_people()
@@ -306,7 +227,7 @@ class TestGetCompanyPeopleError(unittest.TestCase):
 			CompanyProfile(True).get_people()
 
 
-class TestGetCompanyBenefits(unittest.TestCase):
+class TestGetBenefits(unittest.TestCase):
 
 	def setUp(self):
 		call("./setup/start_testing.sh")
@@ -338,19 +259,6 @@ class TestGetCompanyBenefits(unittest.TestCase):
 		expected_result = [{'idBenefit': 3, 'name': 'Plano Dental Sorriso'}, 
 							{'idBenefit': 1, 'name': 'Plano de Saúde Norte Europa'}]
 		self.assertEqual(actual_result, expected_result)
-
-
-class TestGetCompanyBenefitsError(unittest.TestCase):
-
-	def setUp(self):
-		call("./setup/start_testing.sh")
-
-		self.profile_one = CompanyProfile(1)
-		self.profile_two = CompanyProfile(2)
-		self.profile_three = CompanyProfile(3)
-
-	def tearDown(self):
-		call("./setup/finish_testing.sh")
 
 	def test_get_company_benefits_company_doesnt_exist(self):
 		with self.assertRaises(Exception):
