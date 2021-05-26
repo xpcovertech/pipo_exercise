@@ -270,7 +270,7 @@ def benefits_delete_profile():
 	else: 
 		whoops = """Este perfil não existe, por favor selecione outro da lista."""
 		benefits_list = CompanyProfile(session["idCompany"]).get_benefits()
-		return render_template("people_list.html", header = get_header(session), 
+		return render_template("benefits_list.html", header = get_header(session), 
 								benefits_list = benefits_list, whoops = whoops)
 
 
